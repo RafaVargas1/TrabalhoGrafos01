@@ -1,32 +1,25 @@
+#ifndef EDGE_H
+#define EDGE_H
+
 #include <iostream> 
+#include "../Node/node.h"
 
-#include "../Node/node.h";
-#include "../Vertex/vertex.h";
 
+class Graph;
+class Node;
 class Edge {
     public: 
-        int id;
-        int weight;
-        Vertex *head;
-        Node *tail;
+        Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph);
+        void createEdge(Node *nodeHead, Node *tailNode, int weight, Graph *graph);
+        void setNextEdge(Edge* nextEdge);
+        Edge* getNextEdge();
+        int getId();
 
-        Edge(int id, int weight, Vertex *head, Node *tail);
-        ~Edge();
-
-        Edge::Edge(int id, int weight, Vertex *head, Node *tail) {
-            id = id;
-            weight = weight;
-            head = head;
-            tail = tail;
-        }
-
-        Edge::~Edge(){
-            delete head;
-            delete tail;
-        }
-    
-    
     private:
-
-
+        int id;
+        int weight;        
+        Node *tailNode;
+        Edge *nextEdge;   
 };
+
+ #endif

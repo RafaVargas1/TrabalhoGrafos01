@@ -4,8 +4,9 @@
 
 #include <iostream>
 
-// #include "./Vertex/vertex.h";
-// #include "./Edge/edge.h";
+#include "./Graph/graph.cpp"
+#include "./Node/node.cpp"
+#include "./Edge/edge.cpp"
 
 using std::cout; using std::endl;
 using std::copy; using std::string;
@@ -59,6 +60,11 @@ void readFilesInDirectory (const char *directoryPath) {
 void processingNotWeighted(FILE *file) {
     int i=0;
 
+    Graph *graph = new Graph();
+
+    graph->printGraph();  // Nao funciona
+
+
     while (!feof(file)){
         char line[9];
         char *result = fgets(line, 100, file);
@@ -67,15 +73,25 @@ void processingNotWeighted(FILE *file) {
             int space = string(result).find(" ", 0);
             
             
-            string vertex = string(result).substr(0, space);
-            string node = string(result).substr(space, string(result).size() );
+            string head = string(result).substr(0, space);
+            string tail = string(result).substr(space, string(result).size() );
+           
+            int intHead = stoi(head);
+            int intTail = stoi(tail);
 
-            cout << vertex << " " << node << endl;
+            Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
+            Node *nodeTail = graph->createNodeIfDoesntExist(intTail, 0);
+
+            Edge *edge1 = graph->createEdge(nodeHead, nodeTail, 0);
+            Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);
+
         }
 
         i++;
         delete result;
     }
+
+    graph->printGraph(); // Nao funciona
 }
 
 void printArgs(int argc, char *argv[]){
@@ -91,23 +107,28 @@ int main(int argc, char *argv[]){
 
     // printArgs(argc, argv);
 
-    // DIRECIONADO ?, ARESTA PONDERADA ?, PESO VERTICES ?, NOME ARQUIVO ?
+    if (argc < 6){
+    //  NOME ENTRADA ?, NOME SAIDA, DIRECIONADO ?, ARESTA PONDERADA ?, PESO VERTICES ?,
+        cout << "Os argumentos de excecucao sao invalidos. Os argumentos devem seguir o padrao: " << endl;
+        cout << "ARQUIVO DE ENTRADA, ARQUIVO DE SAIDA, (0,1) SE É DIRECIONADO, (0,1) SE AS ARESTAS SAO PONDERADAS, (0,1) SE OS VERTICES TEM PESO" << endl;
+        return 0;
+    }
+
     string dirPath = "./EntryFiles/Not_Weighted_Graphs";        
     bool isDirected = false, hasWeightedEdge = false, hasWeightedVertex = false;
 
-    if ( *argv[2] == '1') 
+    if ( *argv[3] == '1') 
         isDirected = true;
 
-    if ( *argv[3] == '1' )
+    if ( *argv[4] == '1' )
         hasWeightedEdge = true;
 
-    if ( *argv[4] == '1' ) {
+    if ( *argv[5] == '1' ) {
         hasWeightedVertex = true;
         dirPath = "./EntryFiles/Weighted_Graphs";
     }   
 
-    string fileName = argv[5];
-
+    string fileName = argv[1];
 
     string path = string(dirPath) + "/" + string(fileName);
     file = fopen(path.c_str(), "rt");
