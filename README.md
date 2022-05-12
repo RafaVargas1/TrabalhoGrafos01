@@ -7,8 +7,10 @@
     g++ main.cpp -o main
     ./main grafo_1000_1.txt saida.txt 0 0 0
     
- Obs.: A execução segue o padrão: ./[nomeExecutável] [arquivoEntrada] [ArquivoSaida] [Direcionado] 0|1 [Ponderado] 0|1 [Peso nos Vertices] 0|1 
-
+ Obs.: A execução segue o padrão: 
+```
+  ./[nomeExecutável] [arquivoEntrada] [ArquivoSaida] [Direcionado] 0|1 [Ponderado] 0|1 [Peso nos Vertices] 0|1 
+```
 # Classes 
 
 <h3> Graph </h3>
@@ -25,14 +27,14 @@ Representa um grafo. Normalmente é instânciada uma vez por execução e vai gu
 <h3> Node </h3>
 
 Atributos 
-  int pk; // Primary Key = ID Único 
-  int id;
-  int degree;
-  int peso;
-  int grauIn;
-  int grauOut;
-  Node *nextNode;
-  Edge *firstEdge;
+  - int pk; // Primary Key = ID Único 
+  - int id;
+  - int degree;
+  - int peso;
+  - int grauIn;
+  - int grauOut;
+  - Node *nextNode;
+  - Edge *firstEdge;
   
   Representa um nó. Tem uma instância única para cada nó. Está armazenada de forma encadeada e "randômica" (Segue a ordem de aparição no arquivo de texto lido). 
   
@@ -45,10 +47,10 @@ Atributos
 <h3> Edges </h3>
   
 Atributos
-  int id;
-  int weight;        
-  Node *tailNode;
-  Edge *nextEdge;   
+  - int id;
+  - int weight;        
+  - Node *tailNode;
+  - Edge *nextEdge;   
   
 Representa uma aresta. Tem uma instância única para cada relacionamento entre dois nós. Seu total será igual ao total de linhas que tem o arquivo de entrada. 
 
