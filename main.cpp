@@ -4,12 +4,14 @@
 
 #include <iostream>
 
+using std::cout; 
+using std::endl;
+using std::copy;
+using std::string;
+
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
 #include "./Edge/edge.cpp"
-
-using std::cout; using std::endl;
-using std::copy; using std::string;
 
 void printFileDetails(FILE *file, std::string name){
     int i = 1;
@@ -62,36 +64,40 @@ void processingNotWeighted(FILE *file) {
 
     Graph *graph = new Graph();
 
-    graph->printGraph();  // Nao funciona
-
-
     while (!feof(file)){
         char line[9];
-        char *result = fgets(line, 100, file);
+        char *textInLine = fgets(line, 100, file);
+        
+        int space = string(textInLine).find(" ", 0);  
 
-        if (i > 253600){
-            int space = string(result).find(" ", 0);
+        if (space > 0){
+            string head = string(textInLine).substr(0, space);
+            string tail = string(textInLine).substr(space, string(textInLine).size() );
             
-            
-            string head = string(result).substr(0, space);
-            string tail = string(result).substr(space, string(result).size() );
-           
             int intHead = stoi(head);
             int intTail = stoi(tail);
 
+            // cout << intHead << " + " << intTail << endl;
+  
             Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
             Node *nodeTail = graph->createNodeIfDoesntExist(intTail, 0);
-
+    
+            // Criação nos dois sentidos
             Edge *edge1 = graph->createEdge(nodeHead, nodeTail, 0);
-            Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);
-
+            Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);            
         }
+       
+ 
 
         i++;
-        delete result;
+        delete textInLine;
     }
 
-    graph->printGraph(); // Nao funciona
+    cout << graph->getCounterOfEdges() << endl;
+    cout << graph->getCounterOfNodes() << endl; 
+    graph->printGraph();
+    // graph->printNodes();
+
 }
 
 void printArgs(int argc, char *argv[]){

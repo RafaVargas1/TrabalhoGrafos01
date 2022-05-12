@@ -18,10 +18,10 @@ class Node {
         int getId();
 
         Node* getNextNode();
-        Node* createNodeIfDoesntExist(int id, int peso, Graph *graph);
+        void setNextNode(Node *node);
 
         Edge* getFirstEdge();
-        void setFirstEdge(Edge *nextEdge);
+        void setFirstEdge(Edge *firstEdge);
 
     private:
         int pk; // Primary Key = ID Único 
@@ -31,9 +31,7 @@ class Node {
         int grauIn;
         int grauOut;
         Node *nextNode;
-        Edge *nextEdge;
-
-
+        Edge *firstEdge;
 };
 
 #endif 

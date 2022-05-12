@@ -1,11 +1,10 @@
 #include <iostream>
 
-
 #include "node.h"
 
 Node::Node(int id, int peso, Graph *graph) {
-    id = id;
-    peso = peso;
+    this->id = id;
+    this->peso = peso;
   
     graph->addCounterOfNodes();
     pk = graph->getCounterOfNodes(); // Primary Key = ID Único
@@ -14,14 +13,14 @@ Node::Node(int id, int peso, Graph *graph) {
     grauIn = 0;
     grauOut = 0;
     nextNode = NULL;
-    nextEdge = NULL;
+    firstEdge= NULL;
 
 }
 
 void Node::addNode(Node *node, Edge *edge, Graph *graph) {
     
     nextNode = node;
-    nextEdge = edge;
+    firstEdge = edge;
 
     degree++;
 
@@ -35,6 +34,10 @@ int Node::getPkId(){
 
 Node* Node::getNextNode(){
     return nextNode;
+
+}
+void Node::setNextNode(Node *node){
+    nextNode = node;
 }
 
 int Node::getId(){
@@ -42,9 +45,10 @@ int Node::getId(){
 }
 
 Edge* Node::getFirstEdge(){
-    return nextEdge;
+    return firstEdge;
 }
 
-void Node::setFirstEdge(Edge *nextEdge){
-    nextEdge = nextEdge;
+void Node::setFirstEdge(Edge *firstEdge){
+    this->firstEdge = firstEdge;
 }
+

@@ -30,6 +30,7 @@ class Graph {
         Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
 
         void printGraph();
+        void printNodes();
 
     private:
         Node *firstNode;
