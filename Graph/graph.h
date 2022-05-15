@@ -29,7 +29,7 @@ class Graph {
         
         Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
 
-        void printGraph();
+        void outputGraph(string outputFileName);
         void printNodes();
 
     private:
