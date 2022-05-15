@@ -59,16 +59,23 @@ void readFilesInDirectory (const char *directoryPath) {
     }
 }
 
-void processingNotWeighted(FILE *file) {
+void processingNotWeighted(FILE *file, string outputFileName) {
     int i=0;
 
     Graph *graph = new Graph();
 
+    const int lineSize = 50; 
+
     while (!feof(file)){
-        char line[9];
-        char *textInLine = fgets(line, 100, file);
+
+        char line[lineSize];
+        char *textInLine = fgets(line, lineSize, file);
         
-        int space = string(textInLine).find(" ", 0);  
+
+        int space = 0;
+
+        if ( textInLine != nullptr)
+         space = string(textInLine).find(" ", 0);  
 
         if (space > 0){
             string head = string(textInLine).substr(0, space);
@@ -78,13 +85,12 @@ void processingNotWeighted(FILE *file) {
             int intTail = stoi(tail);
 
             // cout << intHead << " + " << intTail << endl;
-  
             Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
             Node *nodeTail = graph->createNodeIfDoesntExist(intTail, 0);
     
             // Criação nos dois sentidos
             Edge *edge1 = graph->createEdge(nodeHead, nodeTail, 0);
-            Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);            
+        
         }
        
  
@@ -93,9 +99,10 @@ void processingNotWeighted(FILE *file) {
         delete textInLine;
     }
 
-    cout << graph->getCounterOfEdges() << endl;
-    cout << graph->getCounterOfNodes() << endl; 
-    graph->printGraph();
+    
+
+
+    graph->outputGraph(outputFileName);
     // graph->printNodes();
 
 }
@@ -145,7 +152,7 @@ int main(int argc, char *argv[]){
     // printFileDetails(file, fileName);
 
     if (!hasWeightedVertex){ 
-        processingNotWeighted(file);
+        processingNotWeighted(file, argv[2]);
     }
 
     return 0;

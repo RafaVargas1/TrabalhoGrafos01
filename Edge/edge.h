@@ -17,6 +17,8 @@ class Edge {
         Edge* getNextEdge();
        
         int getId();
+        Node* getTailNode();
+        
     private:
         int id;
         int weight;        

@@ -12,20 +12,9 @@ Node::Node(int id, int peso, Graph *graph) {
     degree = 0;
     grauIn = 0;
     grauOut = 0;
-    nextNode = NULL;
-    firstEdge= NULL;
+    nextNode = nullptr;
+    firstEdge= nullptr;
 
-}
-
-void Node::addNode(Node *node, Edge *edge, Graph *graph) {
-    
-    nextNode = node;
-    firstEdge = edge;
-
-    degree++;
-
-    grauIn++;  
-    grauOut++;  
 }
 
 int Node::getPkId(){
@@ -37,7 +26,7 @@ Node* Node::getNextNode(){
 
 }
 void Node::setNextNode(Node *node){
-    nextNode = node;
+    this->nextNode = node;
 }
 
 int Node::getId(){

@@ -4,9 +4,11 @@
 
 using std::cout; 
 using std::endl;
+using std::fstream;
+using std::string;
 
 Graph::Graph() {
-    firstNode = NULL;
+    firstNode = nullptr;
     nodesTotal = 0;
     edgesTotal = 0;
 }
@@ -38,9 +40,9 @@ Node* Graph::getFirstNode(){
 Node* Graph::getNodeIfExist(int id) {
     Node* node = firstNode;
 
-    if (node == 0) return 0;
+    if (node == nullptr) return nullptr;
 
-    while (node->getNextNode() != 0) {
+    while (node->getNextNode() != nullptr) {
 
 
         if (node->getId() == id){
@@ -55,7 +57,7 @@ Node* Graph::getNodeIfExist(int id) {
 Node* Graph::createNodeIfDoesntExist(int id, int peso){
     Node* node = this->getNodeIfExist(id);
 
-    if (node == 0){        
+    if (node == nullptr){        
 
         Node* newNode = new Node(id, peso, this);      
         Node* oldFirstNode = firstNode;
@@ -73,7 +75,7 @@ Edge* Graph::createEdge(Node *nodeHead, Node *tailNode, int weight){
 
     Edge *nodeFirstEdge = nodeHead->getFirstEdge();
 
-    if (nodeFirstEdge == 0){
+    if (nodeFirstEdge == nullptr){
         nodeHead->setFirstEdge(newEdge);
     } else {
         newEdge->setNextEdge(nodeFirstEdge);
@@ -84,26 +86,37 @@ Edge* Graph::createEdge(Node *nodeHead, Node *tailNode, int weight){
 
 }
 
-void Graph::printGraph() {
-    int cont = 0;
-    Node* node = firstNode;
+void Graph::outputGraph(string outputFileName) {
+    Node* node = this->firstNode;
 
-    while ( node->getNextNode() != 0) {
-        cont++;
+    FILE *outfile = fopen(outputFileName.c_str(), "w+");
+    string title = "graph NovoGrapho { \n";
+    fwrite(title.c_str(), 1, title.size(), outfile);
+
+    while (node != nullptr) {    
         Edge* edge = node->getFirstEdge();
-
-        cout << cont << " - Node " << node->getId() << " -> ";
-
-        while (edge->getNextEdge() != 0 ) {
+  
+        while (edge != nullptr) {        
             // Id da Aresta (Linha do arquivo em que a aresta é criada)
-            cout << edge->getId() << " | ";
-            edge = edge->getNextEdge();
-        } 
-
-        cout << " . " << endl;
+        
+            string nodeBase = std::to_string(node->getId());
+            string nodeLinked = std::to_string((edge->getTailNode())->getId());
+            string dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+            
+            fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+            
+            edge = edge->getNextEdge();   
+        }        
+      
         node = node->getNextNode();
+    };
 
-    } 
+    string end = "}";
+
+    fwrite(end.c_str(), 1, end.size(), outfile);
+
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+
 }
 
 void Graph::printNodes() {
