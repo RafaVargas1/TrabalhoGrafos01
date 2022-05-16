@@ -9,8 +9,8 @@ Node::Node(int id, int peso, Graph *graph) {
     graph->addCounterOfNodes();
     pk = graph->getCounterOfNodes(); // Primary Key = ID Único
 
-    grauIn = 0;
-    grauOut = 0;
+    degreeIn = 0;
+    degreeOut = 0;
     nextNode = nullptr;
     firstEdge= nullptr;
 
@@ -40,3 +40,18 @@ void Node::setFirstEdge(Edge *firstEdge){
     this->firstEdge = firstEdge;
 }
 
+void Node::incrementDegreeOut(){
+    this->degreeOut++;
+}
+
+void Node::incrementDegreeIn(){
+    this->degreeIn++;
+}
+
+int Node::getGrauIn(){
+    return this->degreeIn;
+}
+
+int Node::getGrauOut(){
+    return this->degreeOut;
+}

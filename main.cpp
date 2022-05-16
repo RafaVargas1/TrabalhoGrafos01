@@ -59,7 +59,7 @@ void readFilesInDirectory (const char *directoryPath) {
     }
 }
 
-void processingWeighted(FILE *file, string outputFileName) {
+Graph* processingWeighted(FILE *file) {
     Graph *graph = new Graph();
 
     const int lineSize = 50; 
@@ -99,12 +99,12 @@ void processingWeighted(FILE *file, string outputFileName) {
         delete textInLine;
     }
 
+    return graph;
     // graph->coeficienteDeAgrupamentoLocal(2);
-    graph->outputGraph(outputFileName, true);
     // graph->printNodes();
 }
 
-void processingNotWeighted(FILE *file, string outputFileName){
+Graph* processingNotWeighted(FILE *file){
     Graph *graph = new Graph();
 
     const int lineSize = 50; 
@@ -137,6 +137,8 @@ void processingNotWeighted(FILE *file, string outputFileName){
         
         delete textInLine;
     }
+
+    return graph;
 }
 
 void printArgs(int argc, char *argv[]){
@@ -153,7 +155,7 @@ int main(int argc, char *argv[]){
     // printArgs(argc, argv);
 
     if (argc < 6){
-    //  NOME ENTRADA ?, NOME SAIDA, DIRECIONADO ?, ARESTA PONDERADA ?, PESO VERTICES ?,
+    //  NOME ENTRADA ?, NOME SAIDA, DIRECIONADO ?, PESO EDGE ?, PESO NODE ?
         cout << "Os argumentos de excecucao sao invalidos. Os argumentos devem seguir o padrao: " << endl;
         cout << "ARQUIVO DE ENTRADA, ARQUIVO DE SAIDA, (0,1) SE É DIRECIONADO, (0,1) SE AS ARESTAS SAO PONDERADAS, (0,1) SE OS VERTICES TEM PESO" << endl;
         return 0;
@@ -165,13 +167,14 @@ int main(int argc, char *argv[]){
     if ( *argv[3] == '1') 
         isDirected = true;
 
-    if ( *argv[4] == '1' )
+    if ( *argv[4] == '1' ){
         hasWeightedEdge = true;
-
-    if ( *argv[5] == '1' ) {
-        hasWeightedNode = true;
         dirPath = "./EntryFiles/Weighted_Graphs";
-    }   
+    }  
+
+    if ( *argv[5] == '1' ) 
+        hasWeightedNode = true;
+  
 
     string fileName = argv[1];
 
@@ -183,11 +186,18 @@ int main(int argc, char *argv[]){
     
     // printFileDetails(file, fileName);
 
-    if (!hasWeightedNode){ 
-        processingNotWeighted(file, argv[2]);
+    Graph* graph = new Graph();
+
+    if (!hasWeightedEdge){ 
+        graph = processingNotWeighted(file);
+        graph->outputGraph(argv[2], false);
+
     } else {
-        processingWeighted(file, argv[2]);
+        graph = processingWeighted(file);
+        graph->outputGraph(argv[2], true);
     }
+
+    
 
 
     return 0;
