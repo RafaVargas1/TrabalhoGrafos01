@@ -69,10 +69,13 @@ Node* Graph::createNodeIfDoesntExist(int id, int peso){
     return node;
 }
 
-Edge* Graph::createEdge(Node *nodeHead, Node *tailNode, int weight){
-    Edge *newEdge = new Edge(nodeHead, tailNode, weight, this);
+Edge* Graph::createEdge(Node *nodeHead, Node *nodeTail, int weight){
+    Edge *newEdge = new Edge(nodeHead, nodeTail, weight, this);
 
     Edge *nodeFirstEdge = nodeHead->getFirstEdge();
+
+    nodeHead->incrementDegreeOut();
+    nodeTail->incrementDegreeIn();
 
     if (nodeFirstEdge == nullptr){
         nodeHead->setFirstEdge(newEdge);
@@ -95,6 +98,8 @@ void Graph::outputGraph(string outputFileName, bool isWeightedGraph) {
 
     while (node != nullptr) {    
         Edge* edge = node->getFirstEdge();
+
+        cout << "No " << node->getId() << " In: " << node->getGrauIn() << " - Out: "<< node->getGrauOut() << endl; 
   
         while (edge != nullptr) {        
             // Id da Aresta (Linha do arquivo em que a aresta é criada)

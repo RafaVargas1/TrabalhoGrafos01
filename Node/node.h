@@ -23,12 +23,18 @@ class Node {
         Edge* getFirstEdge();
         void setFirstEdge(Edge *firstEdge);
 
+        void incrementDegreeOut();
+        void incrementDegreeIn();
+
+        int getGrauIn();
+        int getGrauOut();
+
     private:
         int pk; // Primary Key = ID Único 
         int id;
         int peso;
-        int grauIn;
-        int grauOut;
+        int degreeIn;
+        int degreeOut;
         Node *nextNode;
         Edge *firstEdge;
 };
