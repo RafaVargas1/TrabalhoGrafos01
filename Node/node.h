@@ -26,7 +26,6 @@ class Node {
     private:
         int pk; // Primary Key = ID Único 
         int id;
-        int degree;
         int peso;
         int grauIn;
         int grauOut;

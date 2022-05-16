@@ -9,7 +9,6 @@ Node::Node(int id, int peso, Graph *graph) {
     graph->addCounterOfNodes();
     pk = graph->getCounterOfNodes(); // Primary Key = ID Único
 
-    degree = 0;
     grauIn = 0;
     grauOut = 0;
     nextNode = nullptr;

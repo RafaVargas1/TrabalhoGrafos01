@@ -28,7 +28,3 @@ int Edge::getId(){
 Node* Edge::getTailNode() {
     return tailNode;
 }
-
-int Edge::getWeight() {
-    return this->weight;
-}

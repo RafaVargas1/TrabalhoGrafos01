@@ -29,8 +29,10 @@ class Graph {
         
         Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
 
-        void outputGraph(string outputFileName);
+        void outputGraph(string outputFileName, bool isWeightedGraph);
         void printNodes();
+
+        int coeficienteDeAgrupamentoLocal(int nodeId);
 
     private:
         Node *firstNode;
