@@ -11,8 +11,6 @@ Edge::Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph) {
     this->id = graph->getCounterOfEdges();
 }
 
-
-
 void Edge::setNextEdge(Edge* nextEdge){
     this->nextEdge = nextEdge;
 }
@@ -27,4 +25,8 @@ int Edge::getId(){
 
 Node* Edge::getTailNode() {
     return tailNode;
+}
+
+int Edge::getWeight() {
+    return this->weight;
 }
