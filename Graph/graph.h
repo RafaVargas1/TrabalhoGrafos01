@@ -1,8 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include <iostream> 
-
+#include <iostream>
 
 #include "../Edge/edge.h"
 #include "../Node/node.h"
@@ -11,35 +10,33 @@ class Node;
 class Edge;
 
 class Graph {
-    public:
-        Graph();
-        ~Graph();
+   public:
+    Graph();
+    ~Graph();
 
-        void addCounterOfNodes();
-        int getCounterOfNodes();
+    void addCounterOfNodes();
+    int getCounterOfNodes();
 
-        void addCounterOfEdges();
-        int getCounterOfEdges();
+    void addCounterOfEdges();
+    int getCounterOfEdges();
 
-        void setFirstNode(Node *node);     
-        Node *getFirstNode();
+    void setFirstNode(Node *node);
+    Node *getFirstNode();
 
-        Node *getNodeIfExist(int id);
-        Node *createNodeIfDoesntExist(int id, int peso);
-        
-        Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
+    Node *getNodeIfExist(int id);
+    Node *createNodeIfDoesntExist(int id, int peso);
 
-        void outputGraph(string outputFileName, bool isWeightedGraph);
-        void printNodes();
+    Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
 
-        int coeficienteDeAgrupamentoLocal(int nodeId);
+    void outputGraph(string outputFileName, bool isWeightedGraph, bool isDirectedGraph);
+    void printNodes();
 
-    private:
-        Node *firstNode;
-        int nodesTotal;
-        int edgesTotal;
+    int coeficienteDeAgrupamentoLocal(int nodeId);
 
+   private:
+    Node *firstNode;
+    int nodesTotal;
+    int edgesTotal;
 };
-
 
 #endif
