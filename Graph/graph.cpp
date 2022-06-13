@@ -1,6 +1,7 @@
 #include "graph.h"
 
 #include <iostream>
+#include <stack>
 
 using std::cout;
 using std::endl;
@@ -44,17 +45,19 @@ Node* Graph::getFirstNode() {
  *@return: um ponteiro para o objeto nó já previamente existente
  ****************************************************************/
 Node* Graph::getNodeIfExist(int id) {
-    Node* node = firstNode;
+    Node* node = this->firstNode;
 
     if (node == nullptr) return nullptr;
 
-    while (node->getNextNode() != nullptr) {
+    while (node != nullptr) {
         if (node->getId() == id) {
             return node;
         }
 
         node = node->getNextNode();
     }
+
+    return nullptr;
 }
 
 /*
@@ -177,9 +180,47 @@ void Graph::printNodes() {
 
     while (node->getNextNode() != 0) {
         cont++;
-        cout << cont << " - Node " << node->getId() << endl;
+        cout << cont << " - Node " << node->getId() << "Pk:" << node->getPkId() << endl;
         node = node->getNextNode();
     }
+}
+
+Node* Graph::searchNodePkId(int id) {
+    Node* node = firstNode;
+    int cont = 0;
+
+    while (node->getNextNode() != 0) {
+        if (node->getPkId() == id) {
+            break;
+        }
+        cont++;
+        node = node->getNextNode();
+    }
+
+    if (cont >= getCounterOfNodes()) {
+        cout << "No nao encontrado";
+        return NULL;
+    }
+
+    return node;
+}
+
+void Graph::getAllAdjacents(int id) {
+    Node* node = this->getNodeIfExist(id);
+
+    if (node == nullptr) {
+        return;
+    }
+
+    Edge* edge = node->getFirstEdge();
+
+    cout << " Lista de adjacencia do no " << node->getId() << ": " << endl;
+    while (edge != nullptr) {
+        cout << "- No: " << edge->getTailNode()->getId() << endl;
+        edge = edge->getNextEdge();
+    };
+
+    cout << "Fim" << endl;
 }
 
 /*int Graph::coeficienteDeAgrupamentoLocal(int idNode){
@@ -229,3 +270,84 @@ void Graph::printNodes() {
         edge1to2 = edge1to2->getNextEdge();
     }
 }*/
+
+/*int ArvBin::min(){
+    if(raiz == NULL){
+        cout << "Arvore vazia!";
+        exit(1);
+    }
+
+    int minimo = raiz->getInfo();
+
+    auxMin(raiz, &minimo);
+
+    return minimo;
+}
+
+int ArvBin::auxMin(NoArv *p, int *minimo){
+    if(p != NULL){
+        if(p->getInfo() < *minimo){
+            *minimo = p->getInfo();
+        }
+
+        auxMin(p->getEsq(), minimo);
+        auxMin(p->getDir(), minimo);
+    }
+}
+*/
+
+void Graph::fechoTransitivoDireto(int id) {
+    Node* node = this->getNodeIfExist(id);
+
+    if (node == nullptr) {
+        return;
+    }
+
+    int* aux = depthSearch(node);
+
+    cout << "Vertices que podem ser acessados atraves do no " << node->getId() << ": ";
+    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
+        if (aux[i] == 1 && i != node->getPkId()) {
+            cout << searchNodePkId(i)->getId() << ", ";
+        }
+    }
+}
+
+int* Graph::depthSearch(Node* node) {
+    int* cont = 0;
+    int* visitedNodes = new int[getCounterOfNodes() + 1];
+    for (int i = 0; i <= getCounterOfNodes(); i++) {
+        visitedNodes[i] = 0;
+    }
+
+    auxDepthSearch(node, visitedNodes, cont);
+
+    return visitedNodes;
+}
+
+void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
+    cont++;
+
+    visitedNodes[node->getPkId()] = 1;
+    Edge* edge = node->getFirstEdge();
+
+    while (edge != nullptr) {
+        if (visitedNodes[edge->getTailNode()->getPkId()] == 0) {
+            auxDepthSearch(edge->getTailNode(), visitedNodes, cont);
+        }
+
+        edge = edge->getNextEdge();
+    };
+}
+
+/*
+Node* Graph::fechoTransitivoDireto() {
+    if (this->firstNode == NULL) {
+        return NULL;
+    }
+
+    depthSearch();
+
+    return;
+}
+*/
