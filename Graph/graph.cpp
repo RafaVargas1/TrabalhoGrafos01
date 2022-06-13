@@ -271,31 +271,6 @@ void Graph::getAllAdjacents(int id) {
     }
 }*/
 
-/*int ArvBin::min(){
-    if(raiz == NULL){
-        cout << "Arvore vazia!";
-        exit(1);
-    }
-
-    int minimo = raiz->getInfo();
-
-    auxMin(raiz, &minimo);
-
-    return minimo;
-}
-
-int ArvBin::auxMin(NoArv *p, int *minimo){
-    if(p != NULL){
-        if(p->getInfo() < *minimo){
-            *minimo = p->getInfo();
-        }
-
-        auxMin(p->getEsq(), minimo);
-        auxMin(p->getDir(), minimo);
-    }
-}
-*/
-
 void Graph::fechoTransitivoDireto(int id) {
     Node* node = this->getNodeIfExist(id);
 
@@ -304,18 +279,61 @@ void Graph::fechoTransitivoDireto(int id) {
     }
 
     int* aux = depthSearch(node);
+    bool emptyClasp = 1;
 
     cout << "Vertices que podem ser acessados atraves do no " << node->getId() << ": ";
     for (int i = 0; i < getCounterOfNodes() + 1; i++) {
         if (aux[i] == 1 && i != node->getPkId()) {
+            emptyClasp = 0;
             cout << searchNodePkId(i)->getId() << ", ";
         }
+    }
+
+    if (emptyClasp) {
+        cout << "Fecho vazio" << endl;
+    }
+}
+
+void Graph::fechoTransitivoIndireto(int id) {
+    Node* node = this->getNodeIfExist(id);
+    bool emptyClasp = 1;
+
+    if (node == nullptr) {
+        cout << "No de id inexistente" << endl;
+        return;
+    }
+
+    Node* nodes[getCounterOfNodes()];
+    int cont = 0;
+
+    for (Node* i = firstNode; i != nullptr; i = i->getNextNode()) {
+        if (i != node) {
+            int* aux = depthSearch(i);
+
+            for (int j = 0; j < getCounterOfNodes() + 1; j++) {
+                if (aux[j] == 1 && j == node->getPkId()) {
+                    nodes[cont] = i;
+                    cont++;
+                    break;
+                }
+            }
+        }
+    }
+
+    cout << "Vertices que chegam ao no " << node->getId() << ": ";
+    for (int i = 0; i < cont; i++) {
+        emptyClasp = 0;
+        cout << nodes[i]->getId() << ", ";
+    }
+
+    if (emptyClasp) {
+        cout << "Fecho vazio" << endl;
     }
 }
 
 int* Graph::depthSearch(Node* node) {
     int* cont = 0;
-    int* visitedNodes = new int[getCounterOfNodes() + 1];
+    int* visitedNodes = new int[getCounterOfNodes()];
     for (int i = 0; i <= getCounterOfNodes(); i++) {
         visitedNodes[i] = 0;
     }
@@ -327,7 +345,6 @@ int* Graph::depthSearch(Node* node) {
 
 void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
     cont++;
-
     visitedNodes[node->getPkId()] = 1;
     Edge* edge = node->getFirstEdge();
 

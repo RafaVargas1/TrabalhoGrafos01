@@ -34,6 +34,8 @@ class Graph {
     int coeficienteDeAgrupamentoLocal(int nodeId);
 
     void fechoTransitivoDireto(int id);
+    void fechoTransitivoIndireto(int id);
+
     int *depthSearch(Node *node);
     void auxDepthSearch(Node *node, int visitedNodes[], int *counter);
     Node *searchNodePkId(int id);
