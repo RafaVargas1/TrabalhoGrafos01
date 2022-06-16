@@ -215,7 +215,9 @@ int main(int argc, char *argv[]) {
     std::cout << "(1) Print lista de adjacencia" << endl;
     std::cout << "(2) Print nodes" << endl;
     std::cout << "(3) Fecho Transitivo Direto" << endl;
-    std::cout << "(4) Fecho Transitivo Inireto" << endl;
+    std::cout << "(4) Fecho Transitivo Indireto" << endl;
+    std::cout << "(5) Coeficiente de Agrupamento Local" << endl;
+    std::cout << "(6) Coeficiente de Agrupamento Medio" << endl;
     std::cin >> option;
 
     int no;
@@ -223,7 +225,7 @@ int main(int argc, char *argv[]) {
         case 1:
             std::cout << "Lista de adjacencia de qual no?" << endl;
             std::cin >> no;
-            graph->getAllAdjacents(no);
+            graph->printListAdjacents(no);
             break;
         case 2:
             graph->printNodes();
@@ -237,6 +239,14 @@ int main(int argc, char *argv[]) {
             std::cout << "Fecho Transitivo Indireto de qual no?" << endl;
             std::cin >> no;
             graph->fechoTransitivoIndireto(no);
+            break;
+        case 5:
+            std::cout << "Coeficiente de Agrupamento Local de qual no?" << endl;
+            std::cin >> no;
+            graph->coeficienteDeAgrupamentoLocal(no);
+            break;
+        case 6:
+            graph->coeficienteDeAgrupamentoMedio();
             break;
         default:
             break;

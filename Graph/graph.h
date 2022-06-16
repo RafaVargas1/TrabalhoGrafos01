@@ -31,7 +31,9 @@ class Graph {
     void outputGraph(string outputFileName, bool isWeightedGraph, bool isDirectedGraph);
     void printNodes();
 
-    int coeficienteDeAgrupamentoLocal(int nodeId);
+    void coeficienteDeAgrupamentoLocal(int idNode);
+    bool checkRelationship(Node *node1, Node *node2);
+    void coeficienteDeAgrupamentoMedio();
 
     void fechoTransitivoDireto(int id);
     void fechoTransitivoIndireto(int id);
@@ -39,7 +41,9 @@ class Graph {
     int *depthSearch(Node *node);
     void auxDepthSearch(Node *node, int visitedNodes[], int *counter);
     Node *searchNodePkId(int id);
-    void getAllAdjacents(int id);
+
+    void printListAdjacents(int id);
+    int *getAllAdjacents(int id, int *cont);
 
    private:
     Node *firstNode;

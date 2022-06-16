@@ -1,7 +1,7 @@
 #include "graph.h"
 
+#include <cmath>
 #include <iostream>
-#include <stack>
 
 using std::cout;
 using std::endl;
@@ -205,7 +205,7 @@ Node* Graph::searchNodePkId(int id) {
     return node;
 }
 
-void Graph::getAllAdjacents(int id) {
+void Graph::printListAdjacents(int id) {
     Node* node = this->getNodeIfExist(id);
 
     if (node == nullptr) {
@@ -223,7 +223,27 @@ void Graph::getAllAdjacents(int id) {
     cout << "Fim" << endl;
 }
 
-/*int Graph::coeficienteDeAgrupamentoLocal(int idNode){
+int* Graph::getAllAdjacents(int id, int* cont) {
+    Node* node = this->getNodeIfExist(id);
+    int* allNodeAdjacents = new int[getCounterOfNodes()];
+
+    if (node == nullptr) {
+        return 0;
+    }
+
+    Edge* edge = node->getFirstEdge();
+
+    while (edge != nullptr) {
+        allNodeAdjacents[*cont] = edge->getTailNode()->getId();
+        (*cont)++;
+        edge = edge->getNextEdge();
+    };
+
+    return allNodeAdjacents;
+}
+
+/*
+int Graph::coeficienteDeAgrupamentoLocal(int idNode){
     Node* node1 = this->firstNode;
 
     while ( node1->getId() != idNode ){
@@ -269,7 +289,123 @@ void Graph::getAllAdjacents(int id) {
 
         edge1to2 = edge1to2->getNextEdge();
     }
-}*/
+}
+*/
+
+void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
+    int cont = 0;
+    int resto = 0, quociente = 0, fracionario = 0;
+    int divisor, dividendo, aux;
+    int* allNodeAdjacents = getAllAdjacents(idNode, &cont);
+    int k = 0;
+
+    for (int i = 0; i < cont; i++) {
+        for (int j = i + 1; j < cont; j++) {
+            Node* node1 = this->getNodeIfExist(allNodeAdjacents[i]);
+            Node* node2 = this->getNodeIfExist(allNodeAdjacents[j]);
+            if (node1 != node2 && checkRelationship(node1, node2)) {
+                k++;
+            }
+        }
+    }
+
+    dividendo = 2 * k;
+    divisor = cont * (cont - 1);
+
+    if (dividendo == 0) {
+        cout << "O coeficiente de agrupamento local eh 0";
+    } else if ((dividendo / divisor) == 1) {
+        cout << "O coeficiente de agrupamento local eh: 1";
+    } else {
+        aux = dividendo;
+
+        while (aux >= divisor) {
+            quociente += 1;
+            aux = aux - divisor;
+        }
+
+        for (int i = 0; aux > 0; i--) {
+            fracionario += (10 ^ i) * (aux * 10) / divisor;
+            resto = aux - (divisor * ((aux * 10) / divisor));
+            aux = resto;
+        }
+        cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " = " << quociente << ",  " << fracionario;
+    }
+}
+
+void Graph::coeficienteDeAgrupamentoMedio() {
+    int resto, quociente, fracionario, divisor, dividendo, aux;
+    int* allNodeAdjacents;
+    float coeficienteDeAgrupamento = 0;
+    int k = 0;
+    int cont = 0;
+
+    for (Node* node = getFirstNode(); node != nullptr; node = node->getNextNode()) {
+        k = 0;
+        cont = 0;
+        resto = 0;
+        quociente = 0;
+        fracionario = 0;
+        allNodeAdjacents = getAllAdjacents(node->getId(), &cont);
+
+        for (int i = 0; i < cont; i++) {
+            for (int j = i + 1; j < cont; j++) {
+                Node* node1 = this->getNodeIfExist(allNodeAdjacents[i]);
+                Node* node2 = this->getNodeIfExist(allNodeAdjacents[j]);
+                if (node1 != node2 && checkRelationship(node1, node2)) {
+                    k++;
+                }
+            }
+        }
+
+        dividendo = 2 * k;
+        divisor = cont * (cont - 1);
+
+        if (dividendo == 0) {
+            coeficienteDeAgrupamento += 0;
+        } else if ((dividendo / divisor) == 1) {
+            coeficienteDeAgrupamento += 1;
+        } else {
+            aux = dividendo;
+
+            while (aux >= divisor) {
+                quociente += 1;
+                aux = aux - divisor;
+            }
+
+            int i = 0;
+            for (i = 0; aux >= 0; i--) {
+                fracionario += (10 ^ i) * (aux * 10) / divisor;
+                resto = aux - (divisor * ((aux * 10) / divisor));
+                aux = resto;
+            }
+
+            coeficienteDeAgrupamento += quociente + pow(10, i - 1) * fracionario;
+        }
+    }
+
+    cout << "O coeficiente eh: " << coeficienteDeAgrupamento << "/" << getCounterOfNodes() << " = " << coeficienteDeAgrupamento / getCounterOfNodes() << endl;
+}
+
+bool Graph::checkRelationship(Node* node1, Node* node2) {
+    Edge* edge = node1->getFirstEdge();
+    while (edge != nullptr) {
+        if (edge->getTailNode() == node2) {
+            return true;
+        }
+        edge = edge->getNextEdge();
+    };
+
+    edge = node2->getFirstEdge();
+    while (edge != nullptr) {
+        if (edge->getTailNode() == node1) {
+            return true;
+        }
+        edge = edge->getNextEdge();
+    };
+
+    return false;
+}
 
 void Graph::fechoTransitivoDireto(int id) {
     Node* node = this->getNodeIfExist(id);
@@ -356,15 +492,3 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
         edge = edge->getNextEdge();
     };
 }
-
-/*
-Node* Graph::fechoTransitivoDireto() {
-    if (this->firstNode == NULL) {
-        return NULL;
-    }
-
-    depthSearch();
-
-    return;
-}
-*/
