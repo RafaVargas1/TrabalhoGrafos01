@@ -259,31 +259,6 @@ int* Graph::getAllAdjacents(int id, int* cont) {
 }
 
 /*
- * Função que calcula a divisão com números fracionários, ou seja, mostra divisão
- com vírgula
- *@params: int dividendo: número que será dividido
-           int divisor: número que divide dividido
-           float* quociente: resultado final da divisão
-           float* resto: resto final da divisão
- *
- *@return:
- ****************************************************************/
-void divisaoFracionaria(int dividendo, int divisor, float* quociente, float* resto) {
-    float aux, fracionario = 0;
-
-    *quociente = dividendo / divisor;
-    aux = dividendo % divisor;
-
-    for (int i = -1; aux > 0; i--) {
-        fracionario += (pow(10, i) * ((aux * 10) / divisor));
-        *resto = aux - (divisor * ((aux * 10) / divisor));
-        aux = *resto;
-    }
-
-    *quociente += fracionario;
-}
-
-/*
  * Função que mostra o agrupamento local dos nós dado um nó de partida
  *@params: int idNode: id do nó que se quer saber o agrupamento local
  *
@@ -291,7 +266,7 @@ void divisaoFracionaria(int dividendo, int divisor, float* quociente, float* res
  ****************************************************************/
 void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
     int cont = 0, k = 0;
-    float resto = 0, quociente = 0;
+    float quociente;
     int divisor, dividendo;
     int* allNodeAdjacents = getAllAdjacents(idNode, &cont);
 
@@ -313,7 +288,7 @@ void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
     } else if ((dividendo / divisor) == 1) {
         cout << "O coeficiente de agrupamento local eh: 1";
     } else {
-        divisaoFracionaria(dividendo, divisor, &quociente, &resto);
+        quociente = (float)dividendo / divisor;
 
         cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " =~ " << quociente;
     }
@@ -326,7 +301,7 @@ void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
  *@return:
  ****************************************************************/
 void Graph::coeficienteDeAgrupamentoMedio() {
-    float resto, quociente;
+    float quociente;
     int divisor, dividendo;
     int* allNodeAdjacents;
     float coeficienteDeAgrupamento = 0;
@@ -336,8 +311,6 @@ void Graph::coeficienteDeAgrupamentoMedio() {
     for (Node* node = getFirstNode(); node != nullptr; node = node->getNextNode()) {
         k = 0;
         cont = 0;
-        resto = 0;
-        quociente = 0;
         allNodeAdjacents = getAllAdjacents(node->getId(), &cont);
 
         for (int i = 0; i < cont; i++) {
@@ -358,7 +331,7 @@ void Graph::coeficienteDeAgrupamentoMedio() {
         } else if ((dividendo / divisor) == 1) {
             coeficienteDeAgrupamento += 1;
         } else {
-            divisaoFracionaria(dividendo, divisor, &quociente, &resto);
+            quociente = (float)dividendo / divisor;
 
             coeficienteDeAgrupamento += quociente;
         }
