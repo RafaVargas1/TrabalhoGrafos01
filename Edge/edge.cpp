@@ -3,15 +3,13 @@
 #include "edge.h"
 
 Edge::Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph) {
-    tailNode = tailNode;
-    weight = weight;
-    nextEdge = NULL;
+    this->tailNode = tailNode;
+    this->weight = weight;
+    this->nextEdge = nullptr;
 
     graph->addCounterOfEdges();
-    id = graph->getCounterOfEdges();
+    this->id = graph->getCounterOfEdges();
 }
-
-
 
 void Edge::setNextEdge(Edge* nextEdge){
     this->nextEdge = nextEdge;
@@ -23,4 +21,12 @@ Edge* Edge::getNextEdge() {
 
 int Edge::getId(){
     return id;
+}
+
+Node* Edge::getTailNode() {
+    return tailNode;
+}
+
+int Edge::getWeight() {
+    return this->weight;
 }

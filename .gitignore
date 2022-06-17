@@ -1,1 +1,5 @@
 *.exe
+*.dot
+*.png
+*.svg
+*.bak
