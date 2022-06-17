@@ -10,7 +10,7 @@ class Graph;
 class Node;
 class Edge {
     public: 
-        Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph); 
+        Edge(Node *headNode, Node *tailNode, int weight, Graph *graph); 
         ~Edge();   
 
         void setNextEdge(Edge* nextEdge);
@@ -25,7 +25,9 @@ class Edge {
         int id;
         int weight;        
         Node *tailNode;
+        Node *headNode;
         Edge *nextEdge;   
+        
 };
 
  #endif

@@ -55,3 +55,13 @@ int Node::getGrauIn(){
 int Node::getGrauOut(){
     return this->degreeOut;
 }
+
+bool Node::isInArray(Node* array[], int arraySize){
+    for (int i=0; i < arraySize; i++){
+        if (array[i] = this) {
+            return true;
+        }
+    }
+
+    return false;
+}

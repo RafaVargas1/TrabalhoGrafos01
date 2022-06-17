@@ -448,8 +448,8 @@ void Graph::fechoTransitivoIndireto(int id) {
  ****************************************************************/
 int* Graph::depthSearch(Node* node) {
     int* cont = 0;
-    int* visitedNodes = new int[getCounterOfNodes()];
-    for (int i = 0; i <= getCounterOfNodes(); i++) {
+    int* visitedNodes = new int[this->getCounterOfNodes()];
+    for (int i = 0; i <= this->getCounterOfNodes(); i++) {
         visitedNodes[i] = 0;
     }
 
@@ -479,4 +479,26 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
 
         edge = edge->getNextEdge();
     };
+}
+
+void Graph::treeDeepthSearch() {
+    Graph *searchTree = new Graph();
+    Graph *returnTree = new Graph();
+
+    Node* node = this->getFirstNode();
+    auxTreeDeepthSearch(node, searchTree);
+}
+
+void Graph::auxTreeDeepthSearch(Node* node, Graph *searchTree) {
+    Edge* edge = node->getFirstEdge();
+
+    if (edge != nullptr){
+        Node* auxNode = node;
+        Node* node = edge->getTailNode();
+
+        searchTree->createNodeIfDoesntExist(node->getPkId(), 0);
+        searchTree->createEdge(auxNode, node, edge->getWeight());
+
+        auxTreeDeepthSearch(node, searchTree);
+    }
 }

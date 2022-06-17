@@ -45,6 +45,10 @@ class Graph {
     void printListAdjacents(int id);
     int *getAllAdjacents(int id, int *cont);
 
+    void treeDeepthSearch();
+    void auxTreeDeepthSearch(Node* node,  Graph *searchTree);
+
+
    private:
     Node *firstNode;
     int nodesTotal;
