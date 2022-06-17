@@ -14,53 +14,6 @@ using std::string;
 #include "./Node/node.cpp"
 
 
-// Grafo ponderado
-Graph *processingWeighted(FILE *file, bool isDirected) {
-    Graph *graph = new Graph();
-
-    const int lineSize = 50;
-
-    while (!feof(file)) {
-        char line[lineSize];
-        char *textInLine = fgets(line, lineSize, file);
-
-        int space = 0;
-
-        if (textInLine != nullptr)
-            space = string(textInLine).find(" ", 0);
-
-        if (space > 0) {
-            string head = string(textInLine).substr(0, space);
-            int newSpace = string(textInLine).find(" ", space + 1);
-            string tail = string(textInLine).substr(space, newSpace);
-            string weight = string(textInLine).substr(newSpace, string(textInLine).size());
-
-            int intHead = stoi(head);
-            int intTail = stoi(tail);
-            int intWeigth = stoi(weight);
-
-            // cout << intHead << " - " << intTail << " - " << intWeigth << endl;
-
-            // cout << intHead << " + " << intTail << endl;
-            Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
-            Node *nodeTail = graph->createNodeIfDoesntExist(intTail, 0);
-
-            // Criação nos dois sentidos
-            Edge *edge1 = graph->createEdge(nodeHead, nodeTail, intWeigth);
-            // cout << edge1->getWeight() << endl;
-            if (!isDirected) {
-                Edge *edge2 = graph->createEdge(nodeTail, nodeHead, intWeigth);
-            }
-        }
-
-        delete textInLine;
-    }
-
-    return graph;
-    // graph->coeficienteDeAgrupamentoLocal(2);
-    // graph->printNodes();
-}
-
 Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges) {
     Graph *graph = new Graph();
 
@@ -110,47 +63,6 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
 
     return graph;
 }
-
-// Grafo não ponderado nas arestas
-Graph *processingNotWeighted(FILE *file, bool isDirected) {
-    Graph *graph = new Graph();
-
-    const int lineSize = 50;
-
-    while (!feof(file)) {
-        char line[lineSize];
-        char *textInLine = fgets(line, lineSize, file);
-
-        int space = 0;
-
-        if (textInLine != nullptr)
-            space = string(textInLine).find(" ", 0);
-
-        if (space > 0) {
-            string head = string(textInLine).substr(0, space);
-            string tail = string(textInLine).substr(space, string(textInLine).size());
-
-            int intHead = stoi(head);
-            int intTail = stoi(tail);
-
-            // cout << intHead << " + " << intTail << endl;
-            Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
-            Node *nodeTail = graph->createNodeIfDoesntExist(intTail, 0);
-
-            // Criação nos dois sentidos
-            Edge *edge1 = graph->createEdge(nodeHead, nodeTail, 0);
-            if (!isDirected) {
-                Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);
-            }
-        }
-
-        delete textInLine;
-    }
-
-    return graph;
-}
-
-
 
 bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool  hasWeightedNode, bool  isDirected){
     int confirmation;
