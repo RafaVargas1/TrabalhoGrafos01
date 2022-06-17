@@ -210,5 +210,37 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    int option;
+    std::cout << "Digite a funcionalidade que deseja para o grafo inserido: " << endl;
+    std::cout << "(1) Print lista de adjacencia" << endl;
+    std::cout << "(2) Print nodes" << endl;
+    std::cout << "(3) Fecho Transitivo Direto" << endl;
+    std::cout << "(4) Fecho Transitivo Inireto" << endl;
+    std::cin >> option;
+
+    int no;
+    switch (option) {
+        case 1:
+            std::cout << "Lista de adjacencia de qual no?" << endl;
+            std::cin >> no;
+            graph->getAllAdjacents(no);
+            break;
+        case 2:
+            graph->printNodes();
+            break;
+        case 3:
+            std::cout << "Fecho Transitivo Direto de qual no?" << endl;
+            std::cin >> no;
+            graph->fechoTransitivoDireto(no);
+            break;
+        case 4:
+            std::cout << "Fecho Transitivo Indireto de qual no?" << endl;
+            std::cin >> no;
+            graph->fechoTransitivoIndireto(no);
+            break;
+        default:
+            break;
+    }
+
     return 0;
 }
