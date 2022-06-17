@@ -39,10 +39,11 @@ Node* Graph::getFirstNode() {
 }
 
 /*
- * Função que encontra um nó já existente no grafo através de seu id
+ * Função que encontra um nó já existente no grafo através de seu id ou retorna null,
+ caso o id não corresponda a um nó existente
  *@params: int id: identificador do vértice a ser encontrado no grafo
  *
- *@return: um ponteiro para o objeto nó já previamente existente
+ *@return: um ponteiro para o objeto nó já previamente existente ou nullptr
  ****************************************************************/
 Node* Graph::getNodeIfExist(int id) {
     Node* node = this->firstNode;
@@ -169,7 +170,7 @@ void Graph::outputGraph(string outputFileName, bool isWeightedGraph, bool isDire
 }
 
 /*
- * Função escreve os nós do grafo no terminal
+ * Função escreve todos os nós do grafo no terminal
  *@params:
  *
  *@return:
@@ -185,26 +186,33 @@ void Graph::printNodes() {
     }
 }
 
+/*
+ * Função que encontra um nó já existente no grafo através de seu pkId ou retorna null,
+ caso o id não corresponda a um nó existente
+ *@params: int id: identificador do vértice a ser encontrado no grafo
+ *
+ *@return: um ponteiro para o objeto nó já previamente existente ou nullptr
+ ****************************************************************/
 Node* Graph::searchNodePkId(int id) {
     Node* node = firstNode;
-    int cont = 0;
 
-    while (node->getNextNode() != 0) {
+    while (node != nullptr) {
         if (node->getPkId() == id) {
-            break;
+            return node;
         }
-        cont++;
+
         node = node->getNextNode();
     }
 
-    if (cont >= getCounterOfNodes()) {
-        cout << "No nao encontrado";
-        return NULL;
-    }
-
-    return node;
+    return nullptr;
 }
 
+/*
+ * Função que encontra mostra a lista de adjacências de um nó
+ *@params: int id: identificador do vértice a ser mostrada a lista de adjacência
+ *
+ *@return:
+ ****************************************************************/
 void Graph::printListAdjacents(int id) {
     Node* node = this->getNodeIfExist(id);
 
@@ -223,6 +231,14 @@ void Graph::printListAdjacents(int id) {
     cout << "Fim" << endl;
 }
 
+/*
+ * Função que encontra retorna a lista de adjacências de um nó através de um vetor
+ que contém os id's dos nós adjacentes
+ *@params: int id: identificador do vértice a ser encontrada a lista de adjacência
+ *         int *cont: ponteiro para um contador que indicará quantos nós adjacentes o nó dado possui
+ *
+ *@return: um ponteiro para o vetor de int's (que correspodem aos id's dos nós adjacentes)
+ ****************************************************************/
 int* Graph::getAllAdjacents(int id, int* cont) {
     Node* node = this->getNodeIfExist(id);
     int* allNodeAdjacents = new int[getCounterOfNodes()];
@@ -243,6 +259,259 @@ int* Graph::getAllAdjacents(int id, int* cont) {
 }
 
 /*
+ * Função que calcula a divisão com números fracionários, ou seja, mostra divisão
+ com vírgula
+ *@params: int dividendo: número que será dividido
+           int divisor: número que divide dividido
+           float* quociente: resultado final da divisão
+           float* resto: resto final da divisão
+ *
+ *@return:
+ ****************************************************************/
+void divisaoFracionaria(int dividendo, int divisor, float* quociente, float* resto) {
+    float aux, fracionario = 0;
+
+    *quociente = dividendo / divisor;
+    aux = dividendo % divisor;
+
+    for (int i = -1; aux > 0; i--) {
+        fracionario += (pow(10, i) * ((aux * 10) / divisor));
+        *resto = aux - (divisor * ((aux * 10) / divisor));
+        aux = *resto;
+    }
+
+    *quociente += fracionario;
+}
+
+/*
+ * Função que mostra o agrupamento local dos nós dado um nó de partida
+ *@params: int idNode: id do nó que se quer saber o agrupamento local
+ *
+ *@return:
+ ****************************************************************/
+void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
+    int cont = 0, k = 0;
+    float resto = 0, quociente = 0;
+    int divisor, dividendo;
+    int* allNodeAdjacents = getAllAdjacents(idNode, &cont);
+
+    for (int i = 0; i < cont; i++) {
+        for (int j = i + 1; j < cont; j++) {
+            Node* node1 = this->getNodeIfExist(allNodeAdjacents[i]);
+            Node* node2 = this->getNodeIfExist(allNodeAdjacents[j]);
+            if (node1 != node2 && checkRelationship(node1, node2)) {
+                k++;
+            }
+        }
+    }
+
+    dividendo = 2 * k;
+    divisor = cont * (cont - 1);
+
+    if (dividendo == 0) {
+        cout << "O coeficiente de agrupamento local eh 0";
+    } else if ((dividendo / divisor) == 1) {
+        cout << "O coeficiente de agrupamento local eh: 1";
+    } else {
+        divisaoFracionaria(dividendo, divisor, &quociente, &resto);
+
+        cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " =~ " << quociente;
+    }
+}
+
+/*
+ * Função que mostra o agrupamento médio dos nós
+ *@params:
+ *
+ *@return:
+ ****************************************************************/
+void Graph::coeficienteDeAgrupamentoMedio() {
+    float resto, quociente;
+    int divisor, dividendo;
+    int* allNodeAdjacents;
+    float coeficienteDeAgrupamento = 0;
+    int k = 0;
+    int cont = 0;
+
+    for (Node* node = getFirstNode(); node != nullptr; node = node->getNextNode()) {
+        k = 0;
+        cont = 0;
+        resto = 0;
+        quociente = 0;
+        allNodeAdjacents = getAllAdjacents(node->getId(), &cont);
+
+        for (int i = 0; i < cont; i++) {
+            for (int j = i + 1; j < cont; j++) {
+                Node* node1 = this->getNodeIfExist(allNodeAdjacents[i]);
+                Node* node2 = this->getNodeIfExist(allNodeAdjacents[j]);
+                if (node1 != node2 && checkRelationship(node1, node2)) {
+                    k++;
+                }
+            }
+        }
+
+        dividendo = 2 * k;
+        divisor = cont * (cont - 1);
+
+        if (dividendo == 0) {
+            coeficienteDeAgrupamento += 0;
+        } else if ((dividendo / divisor) == 1) {
+            coeficienteDeAgrupamento += 1;
+        } else {
+            divisaoFracionaria(dividendo, divisor, &quociente, &resto);
+
+            coeficienteDeAgrupamento += quociente;
+        }
+    }
+
+    cout << "O coeficiente de agrupamento médio eh: " << coeficienteDeAgrupamento << "/" << getCounterOfNodes() << " =~ " << coeficienteDeAgrupamento / getCounterOfNodes() << endl;
+}
+
+/*
+ * Função que verifica se dois nós possuem arestas entre si
+ *@params: Node* node1: ponteiro de objeto do tipo nó
+ *         Node* node2: ponteiro de objeto do tipo nó
+ *
+ *@return: retorna verdadeiro se forem vizinhos e falso caso não forem
+ ****************************************************************/
+bool Graph::checkRelationship(Node* node1, Node* node2) {
+    Edge* edge = node1->getFirstEdge();
+    while (edge != nullptr) {
+        if (edge->getTailNode() == node2) {
+            return true;
+        }
+        edge = edge->getNextEdge();
+    };
+
+    edge = node2->getFirstEdge();
+    while (edge != nullptr) {
+        if (edge->getTailNode() == node1) {
+            return true;
+        }
+        edge = edge->getNextEdge();
+    };
+
+    return false;
+}
+
+/*
+ * Função que mostra os nós que podem ser acessados a partir de um nó dado (Fecho Direto)
+ *@params: int id: identificador do vértice a ser encontrado o fecho transitivo direto
+ *
+ *@return:
+ ****************************************************************/
+void Graph::fechoTransitivoDireto(int id) {
+    Node* node = this->getNodeIfExist(id);
+
+    if (node == nullptr) {
+        return;
+    }
+
+    int* aux = depthSearch(node);
+    bool emptyClasp = 1;
+
+    cout << "Vertices que podem ser acessados atraves do no " << node->getId() << ": ";
+    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
+        if (aux[i] == 1 && i != node->getPkId()) {
+            emptyClasp = 0;
+            cout << searchNodePkId(i)->getId() << ", ";
+        }
+    }
+
+    if (emptyClasp) {
+        cout << "Fecho vazio" << endl;
+    }
+}
+
+/*
+ * Função que mostra os nós que chegam ao nó dado (Fecho Indireto)
+ *@params: int id: identificador do vértice a ser encontrado o fecho transitivo indireto
+ *
+ *@return:
+ ****************************************************************/
+void Graph::fechoTransitivoIndireto(int id) {
+    Node* node = this->getNodeIfExist(id);
+    bool emptyClasp = 1;
+
+    if (node == nullptr) {
+        cout << "No de id inexistente" << endl;
+        return;
+    }
+
+    Node* nodes[getCounterOfNodes()];
+    int cont = 0;
+
+    for (Node* i = firstNode; i != nullptr; i = i->getNextNode()) {
+        if (i != node) {
+            int* aux = depthSearch(i);
+
+            for (int j = 0; j < getCounterOfNodes() + 1; j++) {
+                if (aux[j] == 1 && j == node->getPkId()) {
+                    nodes[cont] = i;
+                    cont++;
+                    break;
+                }
+            }
+        }
+    }
+
+    cout << "Vertices que chegam ao no " << node->getId() << ": ";
+    for (int i = 0; i < cont; i++) {
+        emptyClasp = 0;
+        cout << nodes[i]->getId() << ", ";
+    }
+
+    if (emptyClasp) {
+        cout << "Fecho vazio" << endl;
+    }
+}
+
+/*
+ * Função que faz a busca em profundidade e retorna um vetor contendo os id's dos
+ vértices visitados a partir de um nó dado
+ *@params: Node* node: ponteiro de objeto do tipo nó
+ *
+ *@return: um ponteiro para o vetor de int's (que correspodem aos id's dos vértices visitados)
+ ****************************************************************/
+int* Graph::depthSearch(Node* node) {
+    int* cont = 0;
+    int* visitedNodes = new int[getCounterOfNodes()];
+    for (int i = 0; i <= getCounterOfNodes(); i++) {
+        visitedNodes[i] = 0;
+    }
+
+    auxDepthSearch(node, visitedNodes, cont);
+
+    return visitedNodes;
+}
+
+/*
+ * Função que auxiliar da função de busca em profundidade que efetivamente procura
+ os nós do grafo em profundidade  a partir de um dado nó
+ *@params: Node* node: ponteiro de objeto do tipo nó de onde partirá a busca
+ *         int visitedNodes[]: vetor de int's que contém os id's dos vértices visitados
+ *         int* cont: ponteiro para um contador que indicará quantos nós foram visitados
+ *
+ *@return:
+ ****************************************************************/
+void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
+    cont++;
+    visitedNodes[node->getPkId()] = 1;
+    Edge* edge = node->getFirstEdge();
+
+    while (edge != nullptr) {
+        if (visitedNodes[edge->getTailNode()->getPkId()] == 0) {
+            auxDepthSearch(edge->getTailNode(), visitedNodes, cont);
+        }
+
+        edge = edge->getNextEdge();
+    };
+}
+
+/*
+Acho que pode apagar essa função, mas deixei aqui pois foi a função que a gente
+começou a desenvolver na call
+
 int Graph::coeficienteDeAgrupamentoLocal(int idNode){
     Node* node1 = this->firstNode;
 
@@ -291,204 +560,3 @@ int Graph::coeficienteDeAgrupamentoLocal(int idNode){
     }
 }
 */
-
-void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
-    int cont = 0;
-    int resto = 0, quociente = 0, fracionario = 0;
-    int divisor, dividendo, aux;
-    int* allNodeAdjacents = getAllAdjacents(idNode, &cont);
-    int k = 0;
-
-    for (int i = 0; i < cont; i++) {
-        for (int j = i + 1; j < cont; j++) {
-            Node* node1 = this->getNodeIfExist(allNodeAdjacents[i]);
-            Node* node2 = this->getNodeIfExist(allNodeAdjacents[j]);
-            if (node1 != node2 && checkRelationship(node1, node2)) {
-                k++;
-            }
-        }
-    }
-
-    dividendo = 2 * k;
-    divisor = cont * (cont - 1);
-
-    if (dividendo == 0) {
-        cout << "O coeficiente de agrupamento local eh 0";
-    } else if ((dividendo / divisor) == 1) {
-        cout << "O coeficiente de agrupamento local eh: 1";
-    } else {
-        aux = dividendo;
-
-        while (aux >= divisor) {
-            quociente += 1;
-            aux = aux - divisor;
-        }
-
-        for (int i = 0; aux > 0; i--) {
-            fracionario += (10 ^ i) * (aux * 10) / divisor;
-            resto = aux - (divisor * ((aux * 10) / divisor));
-            aux = resto;
-        }
-        cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " = " << quociente << ",  " << fracionario;
-    }
-}
-
-void Graph::coeficienteDeAgrupamentoMedio() {
-    int resto, quociente, fracionario, divisor, dividendo, aux;
-    int* allNodeAdjacents;
-    float coeficienteDeAgrupamento = 0;
-    int k = 0;
-    int cont = 0;
-
-    for (Node* node = getFirstNode(); node != nullptr; node = node->getNextNode()) {
-        k = 0;
-        cont = 0;
-        resto = 0;
-        quociente = 0;
-        fracionario = 0;
-        allNodeAdjacents = getAllAdjacents(node->getId(), &cont);
-
-        for (int i = 0; i < cont; i++) {
-            for (int j = i + 1; j < cont; j++) {
-                Node* node1 = this->getNodeIfExist(allNodeAdjacents[i]);
-                Node* node2 = this->getNodeIfExist(allNodeAdjacents[j]);
-                if (node1 != node2 && checkRelationship(node1, node2)) {
-                    k++;
-                }
-            }
-        }
-
-        dividendo = 2 * k;
-        divisor = cont * (cont - 1);
-
-        if (dividendo == 0) {
-            coeficienteDeAgrupamento += 0;
-        } else if ((dividendo / divisor) == 1) {
-            coeficienteDeAgrupamento += 1;
-        } else {
-            aux = dividendo;
-
-            while (aux >= divisor) {
-                quociente += 1;
-                aux = aux - divisor;
-            }
-
-            int i = 0;
-            for (i = 0; aux >= 0; i--) {
-                fracionario += (10 ^ i) * (aux * 10) / divisor;
-                resto = aux - (divisor * ((aux * 10) / divisor));
-                aux = resto;
-            }
-
-            coeficienteDeAgrupamento += quociente + pow(10, i - 1) * fracionario;
-        }
-    }
-
-    cout << "O coeficiente eh: " << coeficienteDeAgrupamento << "/" << getCounterOfNodes() << " = " << coeficienteDeAgrupamento / getCounterOfNodes() << endl;
-}
-
-bool Graph::checkRelationship(Node* node1, Node* node2) {
-    Edge* edge = node1->getFirstEdge();
-    while (edge != nullptr) {
-        if (edge->getTailNode() == node2) {
-            return true;
-        }
-        edge = edge->getNextEdge();
-    };
-
-    edge = node2->getFirstEdge();
-    while (edge != nullptr) {
-        if (edge->getTailNode() == node1) {
-            return true;
-        }
-        edge = edge->getNextEdge();
-    };
-
-    return false;
-}
-
-void Graph::fechoTransitivoDireto(int id) {
-    Node* node = this->getNodeIfExist(id);
-
-    if (node == nullptr) {
-        return;
-    }
-
-    int* aux = depthSearch(node);
-    bool emptyClasp = 1;
-
-    cout << "Vertices que podem ser acessados atraves do no " << node->getId() << ": ";
-    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
-        if (aux[i] == 1 && i != node->getPkId()) {
-            emptyClasp = 0;
-            cout << searchNodePkId(i)->getId() << ", ";
-        }
-    }
-
-    if (emptyClasp) {
-        cout << "Fecho vazio" << endl;
-    }
-}
-
-void Graph::fechoTransitivoIndireto(int id) {
-    Node* node = this->getNodeIfExist(id);
-    bool emptyClasp = 1;
-
-    if (node == nullptr) {
-        cout << "No de id inexistente" << endl;
-        return;
-    }
-
-    Node* nodes[getCounterOfNodes()];
-    int cont = 0;
-
-    for (Node* i = firstNode; i != nullptr; i = i->getNextNode()) {
-        if (i != node) {
-            int* aux = depthSearch(i);
-
-            for (int j = 0; j < getCounterOfNodes() + 1; j++) {
-                if (aux[j] == 1 && j == node->getPkId()) {
-                    nodes[cont] = i;
-                    cont++;
-                    break;
-                }
-            }
-        }
-    }
-
-    cout << "Vertices que chegam ao no " << node->getId() << ": ";
-    for (int i = 0; i < cont; i++) {
-        emptyClasp = 0;
-        cout << nodes[i]->getId() << ", ";
-    }
-
-    if (emptyClasp) {
-        cout << "Fecho vazio" << endl;
-    }
-}
-
-int* Graph::depthSearch(Node* node) {
-    int* cont = 0;
-    int* visitedNodes = new int[getCounterOfNodes()];
-    for (int i = 0; i <= getCounterOfNodes(); i++) {
-        visitedNodes[i] = 0;
-    }
-
-    auxDepthSearch(node, visitedNodes, cont);
-
-    return visitedNodes;
-}
-
-void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
-    cont++;
-    visitedNodes[node->getPkId()] = 1;
-    Edge* edge = node->getFirstEdge();
-
-    while (edge != nullptr) {
-        if (visitedNodes[edge->getTailNode()->getPkId()] == 0) {
-            auxDepthSearch(edge->getTailNode(), visitedNodes, cont);
-        }
-
-        edge = edge->getNextEdge();
-    };
-}
