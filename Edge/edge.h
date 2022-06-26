@@ -18,6 +18,7 @@ class Edge {
        
         int getId();
         Node* getTailNode();
+        Node* getHeadNode();
 
         int getWeight();
         

@@ -28,6 +28,10 @@ Node* Edge::getTailNode() {
     return tailNode;
 }
 
+Node* Edge::getHeadNode(){
+    return headNode;
+}
+
 int Edge::getWeight() {
     return this->weight;
 }

@@ -1,12 +1,13 @@
 #include "graph.h"
 
-#include <cmath>
 #include <iostream>
+#include <vector>
 
 using std::cout;
 using std::endl;
 using std::fstream;
 using std::string;
+using std::vector;
 
 Graph::Graph() {
     firstNode = nullptr;
@@ -481,24 +482,138 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
     };
 }
 
-void Graph::treeDeepthSearch() {
+
+void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgraph){
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string title = "graph { \n";
+    fwrite(title.c_str(), 1, title.size(), outfile);
+
+    string dotNotation = "";
+
+    for (int i=0; i< subgraph.size(); i++){
+        string nodeBase = std::to_string(subgraph[i]->getHeadNode()->getId());
+        string nodeLinked = std::to_string(subgraph[i]->getTailNode()->getId() );
+        cout << string(nodeBase) << " -- " << string(nodeLinked) << ";\n";
+        dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+        fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+    }
+
+    string end = "}";
+    fwrite(end.c_str(), 1, end.size(), outfile);
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso." << endl;
+  
+}
+
+void Graph::treeDeepthSearch(Node* node) {
     Graph *searchTree = new Graph();
     Graph *returnTree = new Graph();
 
-    Node* node = this->getFirstNode();
-    auxTreeDeepthSearch(node, searchTree);
+    // Vetor auxiliar para marcar os nos visitados no caminhamento 
+    vector<Node*> visitedNodes;
+
+    // Os subgrafos estao representados como Subgrafo Vertice Induzido 
+    
+    // Arvore em ordem de caminhamento 
+    vector<Edge*> mainTreeEdge; 
+    // Arestas de Retorno
+    vector<Edge*> returnTreeEdge;
+
+
+    auxTreeDeepthSearch(node, visitedNodes, mainTreeEdge, returnTreeEdge);
+  
+    this->outputEdgeInducedSubgraph("arvore.dot", mainTreeEdge);
+    this->outputEdgeInducedSubgraph("arestasRetorno.dot", returnTreeEdge);
+    // cout << "Arvore Principal " << endl;
+    // for (int i=0; i< mainTreeEdge.size(); i++){
+    //     cout << mainTreeEdge[i]->getHeadNode()->getId() << "--" << mainTreeEdge[i]->getTailNode()->getId() << endl;
+    // }
+
+    // cout << "\n\nArestas de Retorno" << endl;
+    //  for (int i=0; i< returnTreeEdge.size(); i++){
+    //     cout << returnTreeEdge[i]->getHeadNode()->getId() << "--" << returnTreeEdge[i]->getTailNode()->getId() << endl;
+    // }
 }
 
-void Graph::auxTreeDeepthSearch(Node* node, Graph *searchTree) {
+
+
+/*
+ * Funcao que verifica se uma aresta esta dentro de um vetor de arestas
+ *@params: vector<Edge*>&edgeVector: Referencia a um vetor de arestas
+ *         Edge edge: Aresta a ser testada
+ *
+ *@return: True se edge esta em edgeVector false se nao
+ ****************************************************************/
+bool isEdgeInVector(vector<Edge*>&edgeVector, Edge* edge){
+    for (int i=0; i< edgeVector.size(); i++){
+        if (edgeVector[i] == edge){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Funcao que verifica se um no esta dentro de um vetor de nos
+ *@params: vector<Edge*>&nodeVector: Referencia a um vetor de nos
+ *         Edge node: No a ser testada
+ *
+ *@return: True se no esta em nodeVector false se nao
+ ****************************************************************/
+bool isNodeVisited(vector<Node*>&nodeVector, Node* node){
+       for (int i=0; i< nodeVector.size(); i++){
+        if (nodeVector[i] == node){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>&visitedNodes, vector<Edge*>&mainTreeEdge, vector<Edge*>&returnTreeEdge){
+    if (!isNodeVisited(visitedNodes, node)){
+        visitedNodes.emplace_back(node);
+    }
+
     Edge* edge = node->getFirstEdge();
 
-    if (edge != nullptr){
+    while (edge != nullptr){
         Node* auxNode = node;
         Node* node = edge->getTailNode();
 
-        searchTree->createNodeIfDoesntExist(node->getPkId(), 0);
-        searchTree->createEdge(auxNode, node, edge->getWeight());
 
-        auxTreeDeepthSearch(node, searchTree);
+        if (!isNodeVisited(visitedNodes, edge->getTailNode())) {
+            if (!isEdgeInVector(mainTreeEdge, edge)){
+                mainTreeEdge.emplace_back(edge);   
+
+                /*
+                    Processo que forca as multiarestas a entrarem na arvore.
+                    Isso acontece pois essas multiarestas sao criadas no grafo nao direcional para a representacao correta em memoria, mas essas ligacoes nao existem no grafo real. 
+                */
+                Node* returnNode = edge->getTailNode();
+                Edge* returnEdge = returnNode->getFirstEdge();  
+                while (returnEdge == nullptr || returnEdge->getTailNode() != edge->getHeadNode()){
+                    returnEdge = returnEdge->getNextEdge();
+                }
+
+                if (returnEdge != nullptr)
+                    mainTreeEdge.emplace_back(returnEdge);
+                // Fim do processo que coloca multiarestas na arvore
+                           
+                auxTreeDeepthSearch(edge->getTailNode(), visitedNodes, mainTreeEdge, returnTreeEdge);
+            }
+
+            edge = edge->getNextEdge();  
+
+        } else if ( isNodeVisited(visitedNodes, edge->getTailNode()) ) {
+       
+            if (!isEdgeInVector(mainTreeEdge, edge)){
+                returnTreeEdge.emplace_back(edge);
+            }
+     
+            edge = edge->getNextEdge();
+        }
     }
 }
+

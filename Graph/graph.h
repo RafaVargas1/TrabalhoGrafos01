@@ -2,9 +2,12 @@
 #define GRAPH_H
 
 #include <iostream>
+#include <vector>
 
 #include "../Edge/edge.h"
 #include "../Node/node.h"
+
+using std::vector;
 
 class Node;
 class Edge;
@@ -45,10 +48,12 @@ class Graph {
     void printListAdjacents(int id);
     int *getAllAdjacents(int id, int *cont);
 
-    void treeDeepthSearch();
-    void auxTreeDeepthSearch(Node* node,  Graph *searchTree);
+    void treeDeepthSearch(Node* node);
+    void auxTreeDeepthSearch(Node* node, vector<Node*>&visitedNodes, vector<Edge*>&mainTreeEdge, vector<Edge*>&returnTreeEdge);
 
+    void outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgraph);
 
+   
    private:
     Node *firstNode;
     int nodesTotal;

@@ -138,7 +138,9 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             graph->outputGraph(argv[2], hasWeightedEdge, isDirected);
             break;
         case 8:
-            graph->treeDeepthSearch();
+            cout << "A partir de qual no?" << endl;
+            cin >> no;
+            graph->treeDeepthSearch(graph->getNodeIfExist(no));
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
