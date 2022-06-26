@@ -167,7 +167,7 @@ void Graph::outputGraph(string outputFileName, bool isWeightedGraph, bool isDire
 
     fwrite(end.c_str(), 1, end.size(), outfile);
 
-    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso. Para visualizar encerre a execucao";
 }
 
 /*
@@ -494,14 +494,13 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgr
     for (int i=0; i< subgraph.size(); i++){
         string nodeBase = std::to_string(subgraph[i]->getHeadNode()->getId());
         string nodeLinked = std::to_string(subgraph[i]->getTailNode()->getId() );
-        cout << string(nodeBase) << " -- " << string(nodeLinked) << ";\n";
         dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
         fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
     }
 
     string end = "}";
     fwrite(end.c_str(), 1, end.size(), outfile);
-    cout << "O arquivo " << outputFileName << " foi gerado com sucesso." << endl;
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso. Para visualizar encerre a execucao" << endl;
   
 }
 
