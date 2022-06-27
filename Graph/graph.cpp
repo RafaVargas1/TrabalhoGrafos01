@@ -482,6 +482,14 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
     };
 }
 
+/*
+ * Faz o output em .dot a partir de um vector de vertices
+ *@params: string outputFileName: Nome do arquivo de saida
+ *         vector<Edge*>&subgraph: Subgrafo vertice induzido. No vetor estara somente as referencias as arestas
+ * 
+ *@return:
+ ****************************************************************/
+
 
 void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgraph){
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
@@ -508,30 +516,22 @@ void Graph::treeDeepthSearch(Node* node) {
     Graph *searchTree = new Graph();
     Graph *returnTree = new Graph();
 
-    // Vetor auxiliar para marcar os nos visitados no caminhamento 
+
+    /* 
+        -> visitedNodes - Auxiliar para marcar os nos visitados no caminhamento 
+        -> Os subgrafos serao representados como Subgrafo Vertice Induzido 
+            mainTreeEdge - Arvore em ordem de caminhamento 
+            returnTreeEdge - Arestas de Retorno
+    */
+
     vector<Node*> visitedNodes;
-
-    // Os subgrafos estao representados como Subgrafo Vertice Induzido 
-    
-    // Arvore em ordem de caminhamento 
     vector<Edge*> mainTreeEdge; 
-    // Arestas de Retorno
     vector<Edge*> returnTreeEdge;
-
 
     auxTreeDeepthSearch(node, visitedNodes, mainTreeEdge, returnTreeEdge);
   
     this->outputEdgeInducedSubgraph("arvore.dot", mainTreeEdge);
     this->outputEdgeInducedSubgraph("arestasRetorno.dot", returnTreeEdge);
-    // cout << "Arvore Principal " << endl;
-    // for (int i=0; i< mainTreeEdge.size(); i++){
-    //     cout << mainTreeEdge[i]->getHeadNode()->getId() << "--" << mainTreeEdge[i]->getTailNode()->getId() << endl;
-    // }
-
-    // cout << "\n\nArestas de Retorno" << endl;
-    //  for (int i=0; i< returnTreeEdge.size(); i++){
-    //     cout << returnTreeEdge[i]->getHeadNode()->getId() << "--" << returnTreeEdge[i]->getTailNode()->getId() << endl;
-    // }
 }
 
 

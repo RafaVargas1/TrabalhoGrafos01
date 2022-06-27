@@ -33,8 +33,6 @@ class Node {
     int getGrauIn();
     int getGrauOut();
 
-    bool isInArray(Node* array[], int arraySize);
-
    private:
     int pk;  // Primary Key = ID Único
     int id;
