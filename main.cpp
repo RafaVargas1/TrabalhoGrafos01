@@ -101,6 +101,7 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "(5) Coeficiente de Agrupamento Local" << endl;
     cout << "(6) Coeficiente de Agrupamento Medio" << endl;
     cout << "(7) Output do grafo no formato .dot" << endl;
+    cout << "(8) Arvore gerada pela ordem da busca em profundidade" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
@@ -135,6 +136,11 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             break;
         case 7:
             graph->outputGraph(argv[2], hasWeightedEdge, isDirected);
+            break;
+        case 8:
+            cout << "A partir de qual no?" << endl;
+            cin >> no;
+            graph->treeDeepthSearch(graph->getNodeIfExist(no));
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
