@@ -1,0 +1,2 @@
+Vertices que podem ser acessados atraves do no 6: 
+2,3,4,5,

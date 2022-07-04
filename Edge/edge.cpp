@@ -1,6 +1,6 @@
-#include <iostream>
-
 #include "edge.h"
+
+#include <iostream>
 
 Edge::Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph) {
     this->tailNode = tailNode;
@@ -11,19 +11,19 @@ Edge::Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph) {
     this->id = graph->getCounterOfEdges();
 }
 
-void Edge::setNextEdge(Edge* nextEdge){
+void Edge::setNextEdge(Edge *nextEdge) {
     this->nextEdge = nextEdge;
 }
 
-Edge* Edge::getNextEdge() {
+Edge *Edge::getNextEdge() {
     return nextEdge;
 }
 
-int Edge::getId(){
+int Edge::getId() {
     return id;
 }
 
-Node* Edge::getTailNode() {
+Node *Edge::getTailNode() {
     return tailNode;
 }
 

@@ -33,10 +33,12 @@ class Node {
     int getGrauIn();
     int getGrauOut();
 
+    int getWeight();
+
    private:
     int pk;  // Primary Key = ID Único
     int id;
-    int peso;
+    int weight;
     int degreeIn;
     int degreeOut;
     Node* nextNode;

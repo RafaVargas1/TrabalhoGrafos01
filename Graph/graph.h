@@ -2,9 +2,12 @@
 #define GRAPH_H
 
 #include <iostream>
+#include <list>
 
 #include "../Edge/edge.h"
 #include "../Node/node.h"
+
+using std::string;
 
 class Node;
 class Edge;
@@ -30,6 +33,8 @@ class Graph {
 
     void outputGraph(string outputFileName, bool isWeightedGraph, bool isDirectedGraph);
     void printNodes();
+    void output(string outputFileName, Node *nodes[], int cont, string textStart);
+    void outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, std::list<Node *> nodeUtils);
 
     void coeficienteDeAgrupamentoLocal(int idNode);
     bool checkRelationship(Node *node1, Node *node2);
@@ -44,6 +49,9 @@ class Graph {
 
     void printListAdjacents(int id);
     int *getAllAdjacents(int id, int *cont);
+
+    void dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool isDirectedGraph);
+    int edgeCost(Node *nodeHead, Node *tailNode);
 
    private:
     Node *firstNode;

@@ -1,31 +1,32 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include <iostream> 
+#include <iostream>
 
-#include "../Node/node.h"
 #include "../Graph/graph.h"
+#include "../Node/node.h"
 
 class Graph;
 class Node;
 class Edge {
-    public: 
-        Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph); 
-        ~Edge();   
+   public:
+    Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph);
+    ~Edge();
 
-        void setNextEdge(Edge* nextEdge);
-        Edge* getNextEdge();
-       
-        int getId();
-        Node* getTailNode();
+    void setNextEdge(Edge *nextEdge);
+    Edge *getNextEdge();
 
-        int getWeight();
-        
-    private:
-        int id;
-        int weight;        
-        Node *tailNode;
-        Edge *nextEdge;   
+    int getId();
+    Node *getTailNode();
+
+    int getWeight();
+    int edgeCost(Node *nodeHead, Node *tailNode);
+
+   private:
+    int id;
+    int weight;
+    Node *tailNode;
+    Edge *nextEdge;
 };
 
- #endif
+#endif

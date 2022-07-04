@@ -1,18 +1,17 @@
-#include <iostream>
-
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
 
-using std::cout;
+#include <iostream>
+
 using std::cin;
+using std::cout;
 using std::endl;
 using std::string;
 
 #include "./Edge/edge.cpp"
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
-
 
 Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges) {
     Graph *graph = new Graph();
@@ -29,7 +28,6 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
             space = string(textInLine).find(" ", 0);
 
         if (space > 0) {
-
             string stringHead, stringTail, stringEdgeWeight;
             int intHead, intTail, intEdgeWeight = 0;
 
@@ -49,13 +47,13 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
                 intHead = stoi(stringHead);
                 intTail = stoi(stringTail);
             }
-           
+
             Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
             Node *nodeTail = graph->createNodeIfDoesntExist(intTail, 0);
 
             Edge *edge1 = graph->createEdge(nodeHead, nodeTail, intEdgeWeight);
-            if (!isDirected) 
-                Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);      
+            if (!isDirected)
+                Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);
         }
 
         delete textInLine;
@@ -64,22 +62,23 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
     return graph;
 }
 
-bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool  hasWeightedNode, bool  isDirected){
+bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWeightedNode, bool isDirected) {
     int confirmation;
-    
+
     cout << "\n\n =========================================== \n\n";
-    cout << "---- Confirmacao dos argumentos de entrada ---- \n" << endl;
+    cout << "---- Confirmacao dos argumentos de entrada ---- \n"
+         << endl;
     cout << "-> Caminho do arquivo de Entrada: " << path << endl;
     cout << "-> Nome arquivo de Entrada: " << fileName << endl;
 
     cout << "-> Grafo DIRECIONADO: ";
-    isDirected ? cout << "SIM" << endl : cout << "NAO" << endl;    
-    
+    isDirected ? cout << "SIM" << endl : cout << "NAO" << endl;
+
     cout << "-> Grafo PONDERADOS nas ARESTAS: ";
     hasWeightedEdge == true ? cout << "SIM" << endl : cout << "NAO" << endl;
 
     cout << "-> Grafo PONDERADOS nos NOS: ";
-    hasWeightedNode == true ? cout << "SIM" << endl : cout << "NAO" << endl; 
+    hasWeightedNode == true ? cout << "SIM" << endl : cout << "NAO" << endl;
 
     cout << "\n\n =========================================== \n\n";
     cout << "Voce confirma a entrada de dados ? [1 = SIM | 0 = NAO] " << endl;
@@ -91,7 +90,7 @@ bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool  hasW
     return false;
 }
 
-void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeightedEdge, bool isDirected, Graph *graph){
+void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeightedEdge, bool isDirected, Graph *graph) {
     int option;
     cout << "\nDigite a funcionalidade que deseja para o grafo inserido: " << endl;
     cout << "(1) Print lista de adjacencia" << endl;
@@ -101,11 +100,12 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "(5) Coeficiente de Agrupamento Local" << endl;
     cout << "(6) Coeficiente de Agrupamento Medio" << endl;
     cout << "(7) Output do grafo no formato .dot" << endl;
+    cout << "(8) Dijkstra" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
 
-    int no;
+    int no, noDest;
     switch (option) {
         case 1:
             cout << "Lista de adjacencia de qual no?" << endl;
@@ -136,6 +136,13 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
         case 7:
             graph->outputGraph(argv[2], hasWeightedEdge, isDirected);
             break;
+        case 8:
+            cout << "Dijkstra de qual no de origem?" << endl;
+            cin >> no;
+            cout << "Dijkstra de qual no de destino?" << endl;
+            cin >> noDest;
+            graph->dijkstra(no, noDest, hasWeightedEdge, isDirected);
+            break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
             break;
@@ -147,7 +154,6 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cin >> option;
 
     if (option == 1) processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
-
 }
 
 int main(int argc, char *argv[]) {
@@ -184,15 +190,13 @@ int main(int argc, char *argv[]) {
     if (file == NULL)
         perror("Erro ao abrir o arquivo");
 
-    
-    if (!confirmEntry(fileName, path, hasWeightedEdge, hasWeightedNode, isDirected) ) return 0;
+    if (!confirmEntry(fileName, path, hasWeightedEdge, hasWeightedNode, isDirected)) return 0;
 
     Graph *graph = new Graph();
 
     graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge);
 
     processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
-    
+
     return 0;
 }
-

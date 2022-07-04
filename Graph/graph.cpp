@@ -2,10 +2,20 @@
 
 #include <cmath>
 #include <iostream>
+#include <list>
+#include <queue>
 
 using std::cout;
 using std::endl;
 using std::fstream;
+
+using std::greater;
+using std::list;
+using std::make_pair;
+using std::pair;
+using std::priority_queue;
+using std::vector;
+
 using std::string;
 
 Graph::Graph() {
@@ -179,11 +189,13 @@ void Graph::printNodes() {
     Node* node = firstNode;
     int cont = 0;
 
-    while (node->getNextNode() != 0) {
-        cont++;
-        cout << cont << " - Node " << node->getId() << "Pk:" << node->getPkId() << endl;
+    while (node != nullptr) {
+        cout << cont << " - Node " << node->getId() << " Pk Id: " << node->getPkId() << endl;
         node = node->getNextNode();
+        cont++;
     }
+
+    cout << "Fim";
 }
 
 /*
@@ -265,8 +277,9 @@ int* Graph::getAllAdjacents(int id, int* cont) {
  *@return:
  ****************************************************************/
 void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
+    string outputFileName = "CoeficienteDeAgrupamentoLocal.txt";
     int cont = 0, k = 0;
-    float quociente;
+    float quociente = 0;
     int divisor, dividendo;
     int* allNodeAdjacents = getAllAdjacents(idNode, &cont);
 
@@ -284,14 +297,22 @@ void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
     divisor = cont * (cont - 1);
 
     if (dividendo == 0) {
-        cout << "O coeficiente de agrupamento local eh 0";
+        quociente = 0;
+        cout << "O coeficiente de agrupamento local eh 0" << endl;
     } else if ((dividendo / divisor) == 1) {
-        cout << "O coeficiente de agrupamento local eh: 1";
+        quociente = 1;
+        cout << "O coeficiente de agrupamento local eh: 1" << endl;
     } else {
         quociente = (float)dividendo / divisor;
 
-        cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " =~ " << quociente;
+        cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " =~ " << quociente << endl;
     }
+
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string text = string("O coeficiente de agrupamento local eh: =~") + std::to_string(quociente) + "\n";
+    fwrite(text.c_str(), 1, text.size(), outfile);
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
 }
 
 /*
@@ -301,6 +322,7 @@ void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
  *@return:
  ****************************************************************/
 void Graph::coeficienteDeAgrupamentoMedio() {
+    string outputFileName = "CoeficienteDeAgrupamentoMedio.txt";
     float quociente;
     int divisor, dividendo;
     int* allNodeAdjacents;
@@ -337,7 +359,13 @@ void Graph::coeficienteDeAgrupamentoMedio() {
         }
     }
 
+    // coeficienteDeAgrupamento = coeficienteDeAgrupamento / getCounterOfNodes();
     cout << "O coeficiente de agrupamento médio eh: " << coeficienteDeAgrupamento << "/" << getCounterOfNodes() << " =~ " << coeficienteDeAgrupamento / getCounterOfNodes() << endl;
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string text = string("O coeficiente de agrupamento médio eh =~") + std::to_string(coeficienteDeAgrupamento / getCounterOfNodes());
+    fwrite(text.c_str(), 1, text.size(), outfile);
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
 }
 
 /*
@@ -380,20 +408,29 @@ void Graph::fechoTransitivoDireto(int id) {
         return;
     }
 
+    string outputFileName = "FechoTransitivoDireto.txt";
     int* aux = depthSearch(node);
     bool emptyClasp = 1;
+    Node* nodes[getCounterOfNodes()];
+    int cont = 1;
+    nodes[0] = node;
 
     cout << "Vertices que podem ser acessados atraves do no " << node->getId() << ": ";
+
     for (int i = 0; i < getCounterOfNodes() + 1; i++) {
         if (aux[i] == 1 && i != node->getPkId()) {
-            emptyClasp = 0;
+            if (emptyClasp)
+                emptyClasp = 0;
+
+            nodes[cont] = searchNodePkId(i);
+            cont++;
             cout << searchNodePkId(i)->getId() << ", ";
         }
     }
 
-    if (emptyClasp) {
+    output(outputFileName, nodes, cont, "Vertices que podem ser acessados atraves do no ");
+    if (emptyClasp)
         cout << "Fecho vazio" << endl;
-    }
 }
 
 /*
@@ -411,6 +448,7 @@ void Graph::fechoTransitivoIndireto(int id) {
         return;
     }
 
+    string outputFileName = "FechoTransitivoIndireto.txt";
     Node* nodes[getCounterOfNodes()];
     int cont = 0;
 
@@ -434,9 +472,9 @@ void Graph::fechoTransitivoIndireto(int id) {
         cout << nodes[i]->getId() << ", ";
     }
 
-    if (emptyClasp) {
+    output(outputFileName, nodes, cont, "Vertices que chegam ao no ");
+    if (emptyClasp)
         cout << "Fecho vazio" << endl;
-    }
 }
 
 /*
@@ -479,6 +517,180 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
 
         edge = edge->getNextEdge();
     };
+}
+
+/*
+ * Função escreve o os nós passados em um arquivo
+ *@params: string outputFileName: Nome do arquivo que será registrado os nós
+ *         Node* nodes[]: conjuntos de nós resposta da operação realizada
+ *         int cont: contador de quantos nós há no array nodes
+ *         string textStart: texto inicial a ser escrito
+ *@return:
+ ****************************************************************/
+void Graph::output(string outputFileName, Node* nodes[], int cont, string textStart) {
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string text = string(textStart) + std::to_string(nodes[0]->getId()) + ": \n";
+    fwrite(text.c_str(), 1, text.size(), outfile);
+
+    for (int i = 1; i < cont; i++) {
+        text = std::to_string(nodes[i]->getId()) + string(",");
+        fwrite(text.c_str(), 1, text.size(), outfile);
+    }
+
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+}
+
+/*
+void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, list<Node*> nodesUtils) {
+    Node* node = nodesUtils.front();
+    nodesUtils.pop_front();
+
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string title;
+    if (!isDirectedGraph) {
+        title = "graph { \n";
+    } else {
+        title = "digraph { \n";
+    }
+
+    fwrite(title.c_str(), 1, title.size(), outfile);
+
+    while (node != nullptr) {
+        int cont = 0;
+        int* nodesAdjacents = getAllAdjacents(node->getId(), &cont);
+        // cout << "No " << node->getId() << " In: " << node->getGrauIn() << " - Out: "<< node->getGrauOut() << endl;
+
+        for (Node* k : nodesUtils) {
+            for (int j = 0; j < cont; j++) {
+                if ( == k->getId()) {
+                    string nodeBase = std::to_string(node->getId());
+                    string nodeLinked = std::to_string(*nodesAdjacents);
+
+                    int cost = edgeCost(node, getNodeIfExist(*nodesAdjacents));
+                    *nodesAdjacents++;
+
+                    string dotNotation = "";
+
+                    if (isWeightedGraph) {
+                        string weight = std::to_string(cost);
+                        if (!isDirectedGraph) {
+                            dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+                        } else {
+                            dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+                        }
+                    } else {
+                        if (!isDirectedGraph) {
+                            dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+                        } else {
+                            dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
+                        }
+                    }
+
+                    fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+                }
+                *nodesAdjacents++;
+            }
+        }
+
+        node = nodesUtils.front();
+        nodesUtils.pop_front();
+    };
+
+    string end = "}";
+
+    fwrite(end.c_str(), 1, end.size(), outfile);
+
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+}*/
+
+/*
+ * Função verifica o custo da aresta entre dois nós passados
+ *@params: Node* nodeHead: nó cuja aresta parte
+           Node* tailNode: nó cuja aresta chega
+ *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ ****************************************************************/
+int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
+    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
+        if (i->getTailNode() == tailNode)
+            return i->getWeight();
+    }
+
+    return -1;
+}
+
+/*
+ * Função verifica o caminho de menor custo entre dois nós passados
+ *@params: int idNodeOrig: id do nó origem
+           int idNodeDest: id do nó destino
+ *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ ****************************************************************/
+void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool isDirectedGraph) {
+    bool visitedNodes[getCounterOfNodes()];
+    list<Node*> nodesUtils;
+    int dist[getCounterOfNodes()];
+
+    // primeiro elemento do par é a distancia e o segundo o vértice
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
+        dist[i] = -1;
+        visitedNodes[i] = false;
+    }
+
+    Node* nodeOrig = getNodeIfExist(idNodeOrig);
+    if (nodeOrig == nullptr) {
+        cout << "Vertice invalido" << endl;
+        return;
+    }
+
+    dist[nodeOrig->getPkId()] = 0;
+
+    pq.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
+
+    while (!pq.empty()) {
+        pair<int, int> p = pq.top();
+        int noTop = p.second;
+        Node* nodeTop = getNodeIfExist(noTop);
+        pq.pop();
+
+        if (visitedNodes[nodeTop->getPkId()] == false) {
+            visitedNodes[nodeTop->getPkId()] = true;
+
+            int cont = 0;
+            int* i = getAllAdjacents(nodeTop->getId(), &cont);
+
+            for (int j = 0; j < cont; j++) {
+                Node* v = getNodeIfExist(*i);
+
+                int costEdge = edgeCost(nodeTop, v);
+                if (costEdge == -1)
+                    continue;
+
+                if (dist[v->getPkId()] == -1 || dist[v->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
+                    dist[v->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
+
+                    nodesUtils.push_back(nodeTop);
+
+                    pq.push(make_pair(dist[v->getPkId()], v->getId()));
+                }
+
+                *i++;
+                cout << nodeTop->getId() << " - " << v->getId() << " = " << costEdge << endl;
+            }
+        }
+    }
+
+    cout << getNodeIfExist(idNodeDest)->getPkId();
+    if (dist[getNodeIfExist(idNodeDest)->getPkId()] == -1) {
+        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest;
+        return;
+    }
+
+    cout << "A distancia eh de: " << dist[getNodeIfExist(idNodeDest)->getPkId()];
+    nodesUtils.sort();
+    // outputGraphSetOfNodes("AlgoritmoDijkstra.dot", isWeightedGraph, isDirectedGraph, nodesUtils);
 }
 
 /*
