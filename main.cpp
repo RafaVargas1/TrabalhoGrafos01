@@ -14,7 +14,7 @@ using std::string;
 #include "./Node/node.cpp"
 
 Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges) {
-    Graph *graph = new Graph();
+    Graph *graph = new Graph(isDirected, hasWeightedEdges);
 
     const int lineSize = 50;
 
@@ -134,14 +134,14 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             graph->coeficienteDeAgrupamentoMedio();
             break;
         case 7:
-            graph->outputGraph(argv[2], hasWeightedEdge, isDirected);
+            graph->outputGraph(argv[2]);
             break;
         case 8:
             cout << "Dijkstra de qual no de origem?" << endl;
             cin >> no;
             cout << "Dijkstra de qual no de destino?" << endl;
             cin >> noDest;
-            graph->dijkstra(no, noDest, hasWeightedEdge, isDirected);
+            graph->dijkstra(no, noDest);
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
 
     if (!confirmEntry(fileName, path, hasWeightedEdge, hasWeightedNode, isDirected)) return 0;
 
-    Graph *graph = new Graph();
+    Graph *graph = new Graph(isDirected, hasWeightedEdge);
 
     graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge);
 

@@ -19,7 +19,7 @@ class Edge;
 
 class Graph {
    public:
-    Graph();
+    Graph(bool directed, bool weighted);
     ~Graph();
 
     void addCounterOfNodes();
@@ -31,15 +31,18 @@ class Graph {
     void setFirstNode(Node *node);
     Node *getFirstNode();
 
+    bool getWeighted();
+    bool getDirected();
+
     Node *getNodeIfExist(int id);
     Node *createNodeIfDoesntExist(int id, int peso);
 
     Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
 
-    void outputGraph(string outputFileName, bool isWeightedGraph, bool isDirectedGraph);
+    void outputGraph(string outputFileName);
     void printNodes();
     void output(string outputFileName, Node *nodes[], int cont, string textStart);
-    void outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, std::queue<pair<int, int>> nodes);
+    void outputGraphSetOfNodes(string outputFileName, std::queue<pair<int, int>> nodes);
     int *getAdjacents(int id, Node *nodesInvolved);
     int *getAdjacents(int id, Node *nodesInvolved[], int quantityNodesInvolved);
 
@@ -57,13 +60,15 @@ class Graph {
     void printListAdjacents(int id);
     int *getAllAdjacents(int id, int *cont);
 
-    void dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool isDirectedGraph);
+    void dijkstra(int idNodeOrig, int idNodeDest);
     int edgeCost(Node *nodeHead, Node *tailNode);
 
    private:
     Node *firstNode;
     int nodesTotal;
     int edgesTotal;
+    bool weighted;
+    bool directed;
 };
 
 #endif

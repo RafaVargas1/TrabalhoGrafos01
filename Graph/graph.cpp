@@ -19,10 +19,12 @@ using std::vector;
 
 using std::string;
 
-Graph::Graph() {
+Graph::Graph(bool isDirected, bool hasWeightedEdge) {
     firstNode = nullptr;
     nodesTotal = 0;
     edgesTotal = 0;
+    weighted = isDirected;
+    directed = hasWeightedEdge;
 }
 
 void Graph::addCounterOfNodes() {
@@ -47,6 +49,14 @@ void Graph::setFirstNode(Node* node) {
 
 Node* Graph::getFirstNode() {
     return firstNode;
+}
+
+bool Graph::getWeighted() {
+    return weighted;
+}
+
+bool Graph::getDirected() {
+    return directed;
 }
 
 /*
@@ -124,13 +134,13 @@ Edge* Graph::createEdge(Node* nodeHead, Node* nodeTail, int weight) {
  *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
  *@return:
  ****************************************************************/
-void Graph::outputGraph(string outputFileName, bool isWeightedGraph, bool isDirectedGraph) {
+void Graph::outputGraph(string outputFileName) {
     Node* node = this->firstNode;
 
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
     string title;
-    if (!isDirectedGraph) {
+    if (!getDirected()) {
         title = "graph { \n";
     } else {
         title = "digraph { \n";
@@ -150,15 +160,15 @@ void Graph::outputGraph(string outputFileName, bool isWeightedGraph, bool isDire
 
             string dotNotation = "";
 
-            if (isWeightedGraph) {
+            if (getWeighted()) {
                 string weight = std::to_string(edge->getWeight());
-                if (!isDirectedGraph) {
+                if (!getDirected()) {
                     dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
                 } else {
                     dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
                 }
             } else {
-                if (!isDirectedGraph) {
+                if (!getDirected()) {
                     dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
                 } else {
                     dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
@@ -550,11 +560,11 @@ void Graph::output(string outputFileName, Node* nodes[], int cont, string textSt
  *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
  *@return:
  ****************************************************************/
-void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, queue<pair<int, int>> nodes) {
+void Graph::outputGraphSetOfNodes(string outputFileName, queue<pair<int, int>> nodes) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
     string title;
-    if (!isDirectedGraph) {
+    if (!getDirected()) {
         title = "graph { \n";
     } else {
         title = "digraph { \n";
@@ -580,15 +590,15 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
 
         string dotNotation = "";
 
-        if (isWeightedGraph) {
+        if (getWeighted()) {
             string weight = std::to_string(costEdge);
-            if (!isDirectedGraph) {
+            if (!getDirected()) {
                 dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
             } else {
                 dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
             }
         } else {
-            if (!isDirectedGraph) {
+            if (!getDirected()) {
                 dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
             } else {
                 dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
@@ -628,7 +638,7 @@ int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
            int idNodeDest: id do nó destino
  *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
  ****************************************************************/
-void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool isDirectedGraph) {
+void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
     bool visitedNodes[getCounterOfNodes()];
     int dist[getCounterOfNodes()];
 
@@ -694,58 +704,5 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool 
 
     cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
 
-    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", isWeightedGraph, isDirectedGraph, nodes);
+    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
 }
-
-/*
-Acho que pode apagar essa função, mas deixei aqui pois foi a função que a gente
-começou a desenvolver na call
-
-int Graph::coeficienteDeAgrupamentoLocal(int idNode){
-    Node* node1 = this->firstNode;
-
-    while ( node1->getId() != idNode ){
-        node1 = node1->getNextNode();
-
-        if (node1 == nullptr){
-            cout << "Erro" << endl;
-            return 0;
-        }
-    }
-
-    Edge* edge1to2 = node1->getFirstEdge();
-
-    while (edge1to2 != nullptr){
-        Node* node2 = edge1to2->getTailNode();
-
-        while (node2 != nullptr) {
-            Edge *edge2to3 = node2->getFirstEdge();
-
-            while (edge2to3 != nullptr){
-
-                Node* node3 = edge2to3->getTailNode();
-                Edge *edge3to1 = node3->getFirstEdge();
-
-                cout << node3->getFirstEdge() << endl;
-                cout << node3->getId() << endl;
-
-                while ( edge3to1 != nullptr ){
-
-                    cout << edge3to1 << endl;
-
-                    if (edge3to1->getTailNode() == node1) {
-                        cout << "Soma Coeficiente" << endl;
-                    }
-
-                }
-
-                edge3to1 = edge3to1->getNextEdge();
-            }
-
-            edge2to3 = edge2to3->getNextEdge();
-        }
-
-        edge1to2 = edge1to2->getNextEdge();
-    }
-}
-*/
