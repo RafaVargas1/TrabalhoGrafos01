@@ -643,8 +643,9 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
 }
 */
 
-void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, int dist, priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> nodes) {
+void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, int dist, std::queue<pair<int, int>> nodes) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
+    int currentDist = 0;
 
     string title;
     if (!isDirectedGraph) {
@@ -655,14 +656,13 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
 
     fwrite(title.c_str(), 1, title.size(), outfile);
 
-    pair<int, int> p = nodes.top();
+    pair<int, int> p = nodes.front();
     nodes.pop();
+    currentDist += p.first;
 
-    while (!nodes.empty() && p.first != 6) {
-        pair<int, int> q = nodes.top();
+    while (!nodes.empty() && p.first != dist) {
+        pair<int, int> q = nodes.front();
         nodes.pop();
-
-        cout << "p: " << p.second << " q: " << q.second << endl;
 
         string nodeBase = std::to_string(p.second);
         string nodeLinked = std::to_string(q.second);
@@ -691,6 +691,11 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
         fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
 
         p = q;
+
+        if (currentDist == dist)
+            break;
+
+        currentDist += q.first;
     }
 
     string end = "}";
@@ -708,13 +713,11 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
  ****************************************************************/
 void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool isDirectedGraph) {
     bool visitedNodes[getCounterOfNodes()];
-    Node* nodesUtils[getCounterOfNodes()];
-    int quantityNodesUtils = 0;
     int dist[getCounterOfNodes()];
 
     // primeiro elemento do par é a distancia e o segundo o vértice
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> nodes;
+    std::queue<pair<int, int>> nodes;
 
     for (int i = 0; i < getCounterOfNodes() + 1; i++) {
         dist[i] = -1;
@@ -734,41 +737,35 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool 
 
     while (!pq.empty()) {
         pair<int, int> p = pq.top();
-        int noTop = p.second;
-        Node* nodeTop = getNodeIfExist(noTop);
+        int idNodeTop = p.second;
+        Node* nodeTop = getNodeIfExist(idNodeTop);
         pq.pop();
 
         if (visitedNodes[nodeTop->getPkId()] == false) {
             visitedNodes[nodeTop->getPkId()] = true;
 
             int cont = 0;
-            int* i = getAllAdjacents(nodeTop->getId(), &cont);
+            int* adjacents = getAllAdjacents(nodeTop->getId(), &cont);
 
             for (int j = 0; j < cont; j++) {
-                Node* v = getNodeIfExist(*i);
+                Node* nodeAdjacent = getNodeIfExist(*(adjacents + j));
 
-                int costEdge = edgeCost(nodeTop, v);
-                if (costEdge == -1)
+                int costEdge = edgeCost(nodeTop, nodeAdjacent);
+                if (costEdge == -1)  // não existem aresta entre eles
                     continue;
 
-                if (dist[v->getPkId()] == -1 || dist[v->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
-                    dist[v->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
+                if (dist[nodeAdjacent->getPkId()] == -1 || dist[nodeAdjacent->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
+                    dist[nodeAdjacent->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
 
-                    nodesUtils[quantityNodesUtils] = nodeTop;
-                    quantityNodesUtils++;
+                    cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
 
-                    cout << nodeTop->getId() << " -> " << v->getId() << " = " << dist[v->getPkId()] << endl;
-
-                    pq.push(make_pair(dist[v->getPkId()], v->getId()));
-                    nodes.push(make_pair(dist[v->getPkId()], v->getId()));
+                    pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
+                    nodes.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
                 }
-
-                *i++;
             }
         }
     }
 
-    cout << getNodeIfExist(idNodeDest)->getPkId();
     if (dist[getNodeIfExist(idNodeDest)->getPkId()] == -1) {
         cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
         return;
