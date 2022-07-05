@@ -39,7 +39,7 @@ class Graph {
     void outputGraph(string outputFileName, bool isWeightedGraph, bool isDirectedGraph);
     void printNodes();
     void output(string outputFileName, Node *nodes[], int cont, string textStart);
-    void outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, int dist, std::queue<pair<int, int>> nodes);
+    void outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, std::queue<pair<int, int>> nodes);
     int *getAdjacents(int id, Node *nodesInvolved);
     int *getAdjacents(int id, Node *nodesInvolved[], int quantityNodesInvolved);
 

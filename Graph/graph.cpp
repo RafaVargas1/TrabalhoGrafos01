@@ -14,6 +14,7 @@ using std::list;
 using std::make_pair;
 using std::pair;
 using std::priority_queue;
+using std::queue;
 using std::vector;
 
 using std::string;
@@ -542,110 +543,15 @@ void Graph::output(string outputFileName, Node* nodes[], int cont, string textSt
 }
 
 /*
- * Função verifica o custo da aresta entre dois nós passados
- *@params: Node* nodeHead: nó cuja aresta parte
-           Node* tailNode: nó cuja aresta chega
- *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ * Função escreve o grafo de menor caminho no arquivo passado de acordo com os nós
+ *@params: string outputFileName: Nome do arquivo que será registrado o grafo
+ *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
+ *         bool isDirectedGraph: Informa se trata-se de um grafo direcionado
+ *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
+ *@return:
  ****************************************************************/
-int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
-    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
-        if (i->getTailNode() == tailNode)
-            return i->getWeight();
-    }
-
-    return -1;
-}
-
-/*
-int* Graph::getAdjacents(int id, Node* nodesInvolved[], int quantityNodesInvolved) {
-    Node* node = getNodeIfExist(id);
-    int cont = 0;
-    int* allNodeAdjacents = new int[getCounterOfNodes()];
-
-    if (node == nullptr) {
-        return 0;
-    }
-
-    Edge* edge = node->getFirstEdge();
-
-    for (int j = 0; j < quantityNodesInvolved; j++) {
-        while (edge != nullptr) {
-            for (int i = 0; i < quantityNodesInvolved; i++) {
-                if (nodesInvolved[i] == edge->getTailNode()) {
-                    allNodeAdjacents[cont] = edge->getTailNode()->getId();
-                    cont++;
-                }
-                edge = edge->getNextEdge();
-            }
-        }
-        node = node->getNextNode();
-        edge = node->getFirstEdge();
-    }
-
-    return allNodeAdjacents;
-}
-*/
-/*
-void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, Node* nodesUtils[], int quantityNodesUtils) {
+void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, queue<pair<int, int>> nodes) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
-
-    string title;
-    if (!isDirectedGraph) {
-        title = "graph { \n";
-    } else {
-        title = "digraph { \n";
-    }
-
-    fwrite(title.c_str(), 1, title.size(), outfile);
-
-    Node* node = nodesUtils[0];
-    int cont = 0;
-    int* nodesAdjacents = getAllAdjacents(node->getId(), &cont);
-
-    for (int i = 1; i < quantityNodesUtils - 1; i++) {
-        cout << node->getId() << " - " << *nodesAdjacents << endl;
-        for (int j = 0; j < cont; j++) {
-            if (nodesUtils[i]->getId() == *(nodesAdjacents + j)) {
-                cout << node->getId() << " -> " << *nodesAdjacents << endl;
-                string nodeBase = std::to_string(node->getId());
-                string nodeLinked = std::to_string(*nodesAdjacents);
-
-                int cost = edgeCost(node, getNodeIfExist(*nodesAdjacents));
-                *nodesAdjacents++;
-
-                string dotNotation = "";
-
-                if (isWeightedGraph) {
-                    string weight = std::to_string(cost);
-                    if (!isDirectedGraph) {
-                        dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
-                    } else {
-                        dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
-                    }
-                } else {
-                    if (!isDirectedGraph) {
-                        dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
-                    } else {
-                        dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
-                    }
-                }
-
-                fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
-            }
-        }
-    };
-
-    string end = "}";
-
-    fwrite(end.c_str(), 1, end.size(), outfile);
-
-    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
-}
-*/
-
-void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, bool isDirectedGraph, int dist, std::queue<pair<int, int>> nodes) {
-    FILE* outfile = fopen(outputFileName.c_str(), "w+");
-    int currentDist = 0;
 
     string title;
     if (!isDirectedGraph) {
@@ -658,9 +564,8 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
 
     pair<int, int> p = nodes.front();
     nodes.pop();
-    currentDist += p.first;
 
-    while (!nodes.empty() && p.first != dist) {
+    while (!nodes.empty()) {
         pair<int, int> q = nodes.front();
         nodes.pop();
 
@@ -670,6 +575,8 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
         int costEdge = edgeCost(getNodeIfExist(p.second), getNodeIfExist(q.second));
         if (costEdge == -1)
             continue;
+
+        // cout << "p: " << p.second << " q: " << q.second << " = " << costEdge << endl;
 
         string dotNotation = "";
 
@@ -691,11 +598,6 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
         fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
 
         p = q;
-
-        if (currentDist == dist)
-            break;
-
-        currentDist += q.first;
     }
 
     string end = "}";
@@ -703,6 +605,21 @@ void Graph::outputGraphSetOfNodes(string outputFileName, bool isWeightedGraph, b
     fwrite(end.c_str(), 1, end.size(), outfile);
 
     cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+}
+
+/*
+ * Função verifica o custo da aresta entre dois nós passados
+ *@params: Node* nodeHead: nó cuja aresta parte
+           Node* tailNode: nó cuja aresta chega
+ *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ ****************************************************************/
+int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
+    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
+        if (i->getTailNode() == tailNode)
+            return i->getWeight();
+    }
+
+    return -1;
 }
 
 /*
@@ -739,6 +656,7 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool 
         pair<int, int> p = pq.top();
         int idNodeTop = p.second;
         Node* nodeTop = getNodeIfExist(idNodeTop);
+
         pq.pop();
 
         if (visitedNodes[nodeTop->getPkId()] == false) {
@@ -757,23 +675,26 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest, bool isWeightedGraph, bool 
                 if (dist[nodeAdjacent->getPkId()] == -1 || dist[nodeAdjacent->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
                     dist[nodeAdjacent->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
 
-                    cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
+                    // cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
 
                     pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
-                    nodes.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
+                    nodes.push(make_pair(dist[nodeTop->getPkId()], nodeTop->getId()));
                 }
             }
         }
     }
 
-    if (dist[getNodeIfExist(idNodeDest)->getPkId()] == -1) {
+    Node* nodeDest = getNodeIfExist(idNodeDest);
+    nodes.push(make_pair(dist[nodeDest->getPkId()], nodeDest->getId()));
+
+    if (dist[nodeDest->getPkId()] == -1) {
         cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
         return;
     }
 
-    cout << "A distancia eh de: " << dist[getNodeIfExist(idNodeDest)->getPkId()] << endl;
+    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
 
-    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", isWeightedGraph, isDirectedGraph, dist[getNodeIfExist(idNodeDest)->getPkId()], nodes);
+    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", isWeightedGraph, isDirectedGraph, nodes);
 }
 
 /*
