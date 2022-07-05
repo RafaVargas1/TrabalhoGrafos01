@@ -1,57 +1,60 @@
-#include <iostream>
-
 #include "node.h"
 
-Node::Node(int id, int peso, Graph *graph) {
+#include <iostream>
+
+Node::Node(int id, int weight, Graph *graph) {
     this->id = id;
-    this->peso = peso;
-  
+    this->weight = weight;
+
     graph->addCounterOfNodes();
-    pk = graph->getCounterOfNodes(); // Primary Key = ID Único
+    pk = graph->getCounterOfNodes();  // Primary Key = ID Único
 
     degreeIn = 0;
     degreeOut = 0;
     nextNode = nullptr;
-    firstEdge= nullptr;
-
+    firstEdge = nullptr;
 }
 
-int Node::getPkId(){
+int Node::getPkId() {
     return pk;
 }
 
-Node* Node::getNextNode(){
+Node *Node::getNextNode() {
     return nextNode;
-
 }
-void Node::setNextNode(Node *node){
+void Node::setNextNode(Node *node) {
     this->nextNode = node;
 }
 
-int Node::getId(){
+int Node::getId() {
     return id;
 }
 
-Edge* Node::getFirstEdge(){
+Edge *Node::getFirstEdge() {
     return firstEdge;
 }
 
-void Node::setFirstEdge(Edge *firstEdge){
+void Node::setFirstEdge(Edge *firstEdge) {
     this->firstEdge = firstEdge;
 }
 
-void Node::incrementDegreeOut(){
+void Node::incrementDegreeOut() {
     this->degreeOut++;
 }
 
-void Node::incrementDegreeIn(){
+void Node::incrementDegreeIn() {
     this->degreeIn++;
 }
 
-int Node::getGrauIn(){
+int Node::getGrauIn() {
     return this->degreeIn;
 }
 
-int Node::getGrauOut(){
+int Node::getGrauOut() {
     return this->degreeOut;
 }
+
+int Node::getWeight() {
+    return this->weight;
+}
+

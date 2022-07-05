@@ -1,10 +1,10 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include <iostream> 
+#include <iostream>
 
-#include "../Node/node.h"
 #include "../Graph/graph.h"
+#include "../Node/node.h"
 
 class Graph;
 class Node;
@@ -21,6 +21,7 @@ class Edge {
         Node* getHeadNode();
 
         int getWeight();
+        int edgeCost(Node *nodeHead, Node *tailNode);
         
     private:
         int id;
@@ -28,7 +29,6 @@ class Edge {
         Node *tailNode;
         Node *headNode;
         Edge *nextEdge;   
-        
 };
 
- #endif
+#endif
