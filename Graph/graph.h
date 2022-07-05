@@ -2,17 +2,23 @@
 #define GRAPH_H
 
 #include <iostream>
+
 #include <list>
 #include <queue>
+#include <vector>
+
 
 #include "../Edge/edge.h"
 #include "../Node/node.h"
+
 
 using std::list;
 using std::make_pair;
 using std::pair;
 using std::priority_queue;
 using std::string;
+using std::vector;
+
 
 class Node;
 class Edge;
@@ -63,6 +69,12 @@ class Graph {
     void dijkstra(int idNodeOrig, int idNodeDest);
     int edgeCost(Node *nodeHead, Node *tailNode);
 
+    void treeDeepthSearch(Node* node);
+    void auxTreeDeepthSearch(Node* node, vector<Node*>&visitedNodes, vector<Edge*>&mainTreeEdge, vector<Edge*>&returnTreeEdge);
+
+    void outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgraph);
+
+   
    private:
     Node *firstNode;
     int nodesTotal;
