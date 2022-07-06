@@ -63,6 +63,8 @@ class Graph {
     void dijkstra(int idNodeOrig, int idNodeDest);
     int edgeCost(Node *nodeHead, Node *tailNode);
 
+    void floyd(int idNodeOrig, int idNodeDest);
+
    private:
     Node *firstNode;
     int nodesTotal;

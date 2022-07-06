@@ -644,7 +644,7 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
 
     // primeiro elemento do par é a distancia e o segundo o vértice
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    std::queue<pair<int, int>> nodes;
+    queue<pair<int, int>> nodes;
 
     for (int i = 0; i < getCounterOfNodes() + 1; i++) {
         dist[i] = -1;
@@ -705,4 +705,18 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
     cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
 
     outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
+}
+
+void Graph::floyd(int idNodeOrig, int idNodeDest) {
+    int dist[getCounterOfNodes()];
+    Node* nodeOrig = getNodeIfExist(idNodeOrig);
+    Edge* edge = nodeOrig->getFirstEdge();
+    // primeiro elemento do par é a distancia e o segundo o vértice
+    queue<pair<int, int>> distance;
+
+    while (edge != nullptr) {
+        Node* node = edge->getTailNode();
+
+        distance.push(make_pair(edge->getWeight(), node->getId()));
+    }
 }
