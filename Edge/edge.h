@@ -9,24 +9,26 @@
 class Graph;
 class Node;
 class Edge {
-   public:
-    Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph);
-    ~Edge();
+    public: 
+        Edge(Node *headNode, Node *tailNode, int weight, Graph *graph); 
+        ~Edge();   
 
-    void setNextEdge(Edge *nextEdge);
-    Edge *getNextEdge();
+        void setNextEdge(Edge* nextEdge);
+        Edge* getNextEdge();
+       
+        int getId();
+        Node* getTailNode();
+        Node* getHeadNode();
 
-    int getId();
-    Node *getTailNode();
-
-    int getWeight();
-    int edgeCost(Node *nodeHead, Node *tailNode);
-
-   private:
-    int id;
-    int weight;
-    Node *tailNode;
-    Edge *nextEdge;
+        int getWeight();
+        int edgeCost(Node *nodeHead, Node *tailNode);
+        
+    private:
+        int id;
+        int weight;        
+        Node *tailNode;
+        Node *headNode;
+        Edge *nextEdge;   
 };
 
 #endif

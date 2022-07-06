@@ -57,3 +57,4 @@ int Node::getGrauOut() {
 int Node::getWeight() {
     return this->weight;
 }
+

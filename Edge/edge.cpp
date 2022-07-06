@@ -2,7 +2,10 @@
 
 #include <iostream>
 
-Edge::Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph) {
+//Edge::Edge(Node *nodeHead, Node *tailNode, int weight, Graph *graph) {
+
+Edge::Edge(Node *headNode, Node *tailNode, int weight, Graph *graph) {
+    this->headNode = headNode;
     this->tailNode = tailNode;
     this->weight = weight;
     this->nextEdge = nullptr;
@@ -25,6 +28,10 @@ int Edge::getId() {
 
 Node *Edge::getTailNode() {
     return tailNode;
+}
+
+Node* Edge::getHeadNode(){
+    return headNode;
 }
 
 int Edge::getWeight() {
