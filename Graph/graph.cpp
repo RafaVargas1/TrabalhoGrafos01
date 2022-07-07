@@ -1,7 +1,6 @@
 #include "graph.h"
 
 #include <iostream>
-
 #include <list>
 #include <queue>
 #include <vector>
@@ -702,16 +701,21 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
     if (dist[nodeDest->getPkId()] == -1) {
         cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
         return;
-=======
+    }
+
+    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
+
+    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
+}
+
+/*
  * Faz o output em .dot a partir de um vector de vertices
  *@params: string outputFileName: Nome do arquivo de saida
  *         vector<Edge*>&subgraph: Subgrafo vertice induzido. No vetor estara somente as referencias as arestas
- * 
+ *
  *@return:
  ****************************************************************/
-
-
-void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgraph){
+void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& subgraph) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
     string title = "graph { \n";
@@ -719,9 +723,9 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgr
 
     string dotNotation = "";
 
-    for (int i=0; i< subgraph.size(); i++){
+    for (int i = 0; i < subgraph.size(); i++) {
         string nodeBase = std::to_string(subgraph[i]->getHeadNode()->getId());
-        string nodeLinked = std::to_string(subgraph[i]->getTailNode()->getId() );
+        string nodeLinked = std::to_string(subgraph[i]->getTailNode()->getId());
         dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
         fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
     }
@@ -729,32 +733,28 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>&subgr
     string end = "}";
     fwrite(end.c_str(), 1, end.size(), outfile);
     cout << "O arquivo " << outputFileName << " foi gerado com sucesso. Para visualizar encerre a execucao" << endl;
-  
 }
 
 void Graph::treeDeepthSearch(Node* node) {
-    Graph *searchTree = new Graph();
-    Graph *returnTree = new Graph();
+    Graph* searchTree = new Graph(false, false);
+    Graph* returnTree = new Graph(false, false);
 
-
-    /* 
-        -> visitedNodes - Auxiliar para marcar os nos visitados no caminhamento 
-        -> Os subgrafos serao representados como Subgrafo Vertice Induzido 
-            mainTreeEdge - Arvore em ordem de caminhamento 
+    /*
+        -> visitedNodes - Auxiliar para marcar os nos visitados no caminhamento
+        -> Os subgrafos serao representados como Subgrafo Vertice Induzido
+            mainTreeEdge - Arvore em ordem de caminhamento
             returnTreeEdge - Arestas de Retorno
     */
 
     vector<Node*> visitedNodes;
-    vector<Edge*> mainTreeEdge; 
+    vector<Edge*> mainTreeEdge;
     vector<Edge*> returnTreeEdge;
 
     auxTreeDeepthSearch(node, visitedNodes, mainTreeEdge, returnTreeEdge);
-  
+
     this->outputEdgeInducedSubgraph("arvore.dot", mainTreeEdge);
     this->outputEdgeInducedSubgraph("arestasRetorno.dot", returnTreeEdge);
 }
-
-
 
 /*
  * Funcao que verifica se uma aresta esta dentro de um vetor de arestas
@@ -763,9 +763,9 @@ void Graph::treeDeepthSearch(Node* node) {
  *
  *@return: True se edge esta em edgeVector false se nao
  ****************************************************************/
-bool isEdgeInVector(vector<Edge*>&edgeVector, Edge* edge){
-    for (int i=0; i< edgeVector.size(); i++){
-        if (edgeVector[i] == edge){
+bool isEdgeInVector(vector<Edge*>& edgeVector, Edge* edge) {
+    for (int i = 0; i < edgeVector.size(); i++) {
+        if (edgeVector[i] == edge) {
             return true;
         }
     }
@@ -780,9 +780,9 @@ bool isEdgeInVector(vector<Edge*>&edgeVector, Edge* edge){
  *
  *@return: True se no esta em nodeVector false se nao
  ****************************************************************/
-bool isNodeVisited(vector<Node*>&nodeVector, Node* node){
-       for (int i=0; i< nodeVector.size(); i++){
-        if (nodeVector[i] == node){
+bool isNodeVisited(vector<Node*>& nodeVector, Node* node) {
+    for (int i = 0; i < nodeVector.size(); i++) {
+        if (nodeVector[i] == node) {
             return true;
         }
     }
@@ -790,66 +790,106 @@ bool isNodeVisited(vector<Node*>&nodeVector, Node* node){
     return false;
 }
 
-void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>&visitedNodes, vector<Edge*>&mainTreeEdge, vector<Edge*>&returnTreeEdge){
-    if (!isNodeVisited(visitedNodes, node)){
+void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>& visitedNodes, vector<Edge*>& mainTreeEdge, vector<Edge*>& returnTreeEdge) {
+    if (!isNodeVisited(visitedNodes, node)) {
         visitedNodes.emplace_back(node);
     }
 
     Edge* edge = node->getFirstEdge();
 
-    while (edge != nullptr){
+    while (edge != nullptr) {
         Node* auxNode = node;
         Node* node = edge->getTailNode();
 
-
         if (!isNodeVisited(visitedNodes, edge->getTailNode())) {
-            if (!isEdgeInVector(mainTreeEdge, edge)){
-                mainTreeEdge.emplace_back(edge);   
+            if (!isEdgeInVector(mainTreeEdge, edge)) {
+                mainTreeEdge.emplace_back(edge);
 
                 /*
                     Processo que forca as multiarestas a entrarem na arvore.
-                    Isso acontece pois essas multiarestas sao criadas no grafo nao direcional para a representacao correta em memoria, mas essas ligacoes nao existem no grafo real. 
+                    Isso acontece pois essas multiarestas sao criadas no grafo nao direcional para a representacao correta em memoria, mas essas ligacoes nao existem no grafo real.
                 */
                 Node* returnNode = edge->getTailNode();
-                Edge* returnEdge = returnNode->getFirstEdge();  
-                while (returnEdge == nullptr || returnEdge->getTailNode() != edge->getHeadNode()){
+                Edge* returnEdge = returnNode->getFirstEdge();
+                while (returnEdge == nullptr || returnEdge->getTailNode() != edge->getHeadNode()) {
                     returnEdge = returnEdge->getNextEdge();
                 }
 
                 if (returnEdge != nullptr)
                     mainTreeEdge.emplace_back(returnEdge);
                 // Fim do processo que coloca multiarestas na arvore
-                           
+
                 auxTreeDeepthSearch(edge->getTailNode(), visitedNodes, mainTreeEdge, returnTreeEdge);
             }
 
-            edge = edge->getNextEdge();  
+            edge = edge->getNextEdge();
 
-        } else if ( isNodeVisited(visitedNodes, edge->getTailNode()) ) {
-       
-            if (!isEdgeInVector(mainTreeEdge, edge)){
+        } else if (isNodeVisited(visitedNodes, edge->getTailNode())) {
+            if (!isEdgeInVector(mainTreeEdge, edge)) {
                 returnTreeEdge.emplace_back(edge);
             }
-     
+
             edge = edge->getNextEdge();
         }
     }
-
-    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
-
-    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
 }
 
 void Graph::floyd(int idNodeOrig, int idNodeDest) {
-    int dist[getCounterOfNodes()];
     Node* nodeOrig = getNodeIfExist(idNodeOrig);
-    Edge* edge = nodeOrig->getFirstEdge();
-    // primeiro elemento do par é a distancia e o segundo o vértice
-    queue<pair<int, int>> distance;
+    Node* nodeDest = getNodeIfExist(idNodeDest);
+    int n = getCounterOfNodes();
 
-    while (edge != nullptr) {
-        Node* node = edge->getTailNode();
+    // primeiro elemento do par é a distancia e o segundo é o pkId do vértice
+    // vector<pair<int, int>> distance;
+    // primeiro elemento é o vertice cabeça e o segundo o verice cauda
+    int distance[n][n];
 
-        distance.push(make_pair(edge->getWeight(), node->getId()));
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            Node* nodeI = searchNodePkId(i);
+            Node* nodeJ = searchNodePkId(j);
+            int weight = edgeCost(nodeI, nodeJ);
+
+            // pair<int, int> p = make_pair(weight, i);
+            //  distance.push_back(p);
+            distance[i][j] = weight;
+        }
     }
+
+    // distance[nodeOrig->getPkId()][nodeOrig->getPkId()] = 0;
+
+    /*
+        while (!distance.empty()) {
+            pair<int, int> q = distance.front();
+            distance.pop();
+
+            cout << nodeOrig->getId() << " - " << q.second << " = " << q.first << endl;
+        }
+
+    for (int i = 1; i < n + 1; i++) {
+        cout << nodeOrig->getId() << " - " << i << " = " << distance[nodeOrig->getPkId()][i] << endl;
+    }*/
+
+    for (int k = 1; k <= n; k++) {
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                cout << k << " -> " << j << " -> " << i << endl;
+
+                if (distance[i][k] == -1 || distance[k][j] == -1 || i == k) {
+                    continue;
+                }
+
+                if (distance[i][j] > distance[i][k] + distance[k][j] || distance[i][j] == -1) {
+                    distance[i][j] = distance[i][k] + distance[k][j];
+                }
+            }
+        }
+    }
+
+    if (distance[nodeOrig->getPkId()][nodeDest->getPkId()] == -1) {
+        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
+        return;
+    }
+
+    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << distance[nodeOrig->getPkId()][nodeDest->getPkId()] << endl;
 }
