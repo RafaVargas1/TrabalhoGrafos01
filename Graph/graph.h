@@ -44,9 +44,7 @@ class Graph {
     void outputGraph(string outputFileName);
     void printNodes();
     void output(string outputFileName, Node *nodes[], int cont, string textStart);
-    void outputGraphSetOfNodes(string outputFileName, std::queue<pair<int, int>> nodes);
-    int *getAdjacents(int id, Node *nodesInvolved);
-    int *getAdjacents(int id, Node *nodesInvolved[], int quantityNodesInvolved);
+    void outputGraphSetOfNodes(string outputFileName, std::queue<int> nodes);
 
     void coeficienteDeAgrupamentoLocal(int idNode);
     bool checkRelationship(Node *node1, Node *node2);

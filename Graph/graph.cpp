@@ -3,6 +3,8 @@
 #include <iostream>
 #include <list>
 #include <queue>
+#include <stack>
+#include <unordered_set>
 #include <vector>
 
 using std::cout;
@@ -561,7 +563,7 @@ void Graph::output(string outputFileName, Node* nodes[], int cont, string textSt
  *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
  *@return:
  ****************************************************************/
-void Graph::outputGraphSetOfNodes(string outputFileName, queue<pair<int, int>> nodes) {
+void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
     string title;
@@ -573,17 +575,17 @@ void Graph::outputGraphSetOfNodes(string outputFileName, queue<pair<int, int>> n
 
     fwrite(title.c_str(), 1, title.size(), outfile);
 
-    pair<int, int> p = nodes.front();
+    int p = nodes.front();
     nodes.pop();
 
     while (!nodes.empty()) {
-        pair<int, int> q = nodes.front();
+        int q = nodes.front();
         nodes.pop();
 
-        string nodeBase = std::to_string(p.second);
-        string nodeLinked = std::to_string(q.second);
+        string nodeBase = std::to_string(p);
+        string nodeLinked = std::to_string(q);
 
-        int costEdge = edgeCost(getNodeIfExist(p.second), getNodeIfExist(q.second));
+        int costEdge = edgeCost(getNodeIfExist(p), getNodeIfExist(q));
         if (costEdge == -1)
             continue;
 
@@ -645,7 +647,7 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
 
     // primeiro elemento do par é a distancia e o segundo o vértice
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    queue<pair<int, int>> nodes;
+    queue<int> nodes;
 
     for (int i = 0; i < getCounterOfNodes() + 1; i++) {
         dist[i] = -1;
@@ -661,7 +663,7 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
     dist[nodeOrig->getPkId()] = 0;
 
     pq.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
-    nodes.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
+    nodes.push(nodeOrig->getId());
 
     while (!pq.empty()) {
         pair<int, int> p = pq.top();
@@ -689,14 +691,14 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
                     // cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
 
                     pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
-                    nodes.push(make_pair(dist[nodeTop->getPkId()], nodeTop->getId()));
+                    nodes.push(nodeTop->getId());
                 }
             }
         }
     }
 
     Node* nodeDest = getNodeIfExist(idNodeDest);
-    nodes.push(make_pair(dist[nodeDest->getPkId()], nodeDest->getId()));
+    nodes.push(nodeDest->getId());
 
     if (dist[nodeDest->getPkId()] == -1) {
         cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
@@ -839,6 +841,11 @@ void Graph::floyd(int idNodeOrig, int idNodeDest) {
     Node* nodeDest = getNodeIfExist(idNodeDest);
     int n = getCounterOfNodes();
 
+    std::unordered_set<int> nodesSet;
+
+    std::stack<int> nodesStack;
+    std::queue<int> nodesQueue;
+
     // primeiro elemento do par é a distancia e o segundo é o pkId do vértice
     // vector<pair<int, int>> distance;
     // primeiro elemento é o vertice cabeça e o segundo o verice cauda
@@ -850,30 +857,14 @@ void Graph::floyd(int idNodeOrig, int idNodeDest) {
             Node* nodeJ = searchNodePkId(j);
             int weight = edgeCost(nodeI, nodeJ);
 
-            // pair<int, int> p = make_pair(weight, i);
-            //  distance.push_back(p);
             distance[i][j] = weight;
         }
     }
 
-    // distance[nodeOrig->getPkId()][nodeOrig->getPkId()] = 0;
-
-    /*
-        while (!distance.empty()) {
-            pair<int, int> q = distance.front();
-            distance.pop();
-
-            cout << nodeOrig->getId() << " - " << q.second << " = " << q.first << endl;
-        }
-
-    for (int i = 1; i < n + 1; i++) {
-        cout << nodeOrig->getId() << " - " << i << " = " << distance[nodeOrig->getPkId()][i] << endl;
-    }*/
-
     for (int k = 1; k <= n; k++) {
-        for (int i = 1; i <= n; i++) {
+        for (int i = 1; i != nodeDest->getPkId(); i++) {
             for (int j = 1; j <= n; j++) {
-                cout << k << " -> " << j << " -> " << i << endl;
+                // cout << i << " -> " << j << " = " << distance[i][j] << endl;
 
                 if (distance[i][k] == -1 || distance[k][j] == -1 || i == k) {
                     continue;
@@ -882,9 +873,18 @@ void Graph::floyd(int idNodeOrig, int idNodeDest) {
                 if (distance[i][j] > distance[i][k] + distance[k][j] || distance[i][j] == -1) {
                     distance[i][j] = distance[i][k] + distance[k][j];
                 }
+
+                if (j == nodeDest->getPkId()) {
+                    // nodes.insert(make_pair(i, distance[j][i]));
+
+                    nodesSet.insert(i);
+                    cout << "i: " << i << endl;
+                }
             }
         }
     }
+
+    nodesSet.insert(nodeDest->getPkId());
 
     if (distance[nodeOrig->getPkId()][nodeDest->getPkId()] == -1) {
         cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
@@ -892,4 +892,16 @@ void Graph::floyd(int idNodeOrig, int idNodeDest) {
     }
 
     cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << distance[nodeOrig->getPkId()][nodeDest->getPkId()] << endl;
+
+    for (auto i : nodesSet) {
+        nodesStack.push(i);
+        std::cout << i << std::endl;
+    }
+
+    while (!nodesStack.empty()) {
+        nodesQueue.push(nodesStack.top());
+        nodesStack.pop();
+    }
+
+    outputGraphSetOfNodes("AlgoritmoFloyd.dot", nodesQueue);
 }
