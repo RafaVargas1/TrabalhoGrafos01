@@ -102,6 +102,7 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "(7) Output do grafo no formato .dot" << endl;
     cout << "(8) Arvore gerada pela ordem da busca em profundidade" << endl;
     cout << "(9) Caminho mínimo pelo Algoritmo de Dijkstra" << endl;
+    cout << "(10) Caminho mínimo pelo Algoritmo de Floyd" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
@@ -148,6 +149,13 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             cout << "Dijkstra de qual no de destino?" << endl;
             cin >> noDest;
             graph->dijkstra(no, noDest);
+            break;
+        case 10:
+            cout << "Floyd de qual no de origem?" << endl;
+            cin >> no;
+            cout << "Floyd de qual no de destino?" << endl;
+            cin >> noDest;
+            graph->floyd(no, noDest);
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);

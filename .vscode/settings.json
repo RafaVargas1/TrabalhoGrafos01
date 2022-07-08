@@ -45,6 +45,8 @@
     "streambuf": "cpp",
     "typeinfo": "cpp",
     "list": "cpp",
-    "queue": "cpp"
+    "queue": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp"
   }
 }
