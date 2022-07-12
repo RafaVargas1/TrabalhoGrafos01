@@ -36,15 +36,19 @@ class Graph {
     bool getWeighted();
     bool getDirected();
 
+    int *getAllAdjacents(int id, int *cont);
     Node *getNodeIfExist(int id);
-    Node *createNodeIfDoesntExist(int id, int peso);
+    Node *getNodePkId(int id);
 
+    Node *createNodeIfDoesntExist(int id, int peso);
     Edge *createEdge(Node *nodeHead, Node *tailNode, int weight);
 
     void outputGraph(string outputFileName);
-    void printNodes();
-    void output(string outputFileName, Node *nodes[], int cont, string textStart);
+    void outputNodes(string outputFileName, Node *nodes[], int cont, string textStart);
     void outputGraphSetOfNodes(string outputFileName, std::queue<int> nodes);
+    void outputEdgeInducedSubgraph(string outputFileName, vector<Edge *> &subgraph);
+    void printListAdjacents(int id);
+    void printNodes();
 
     void coeficienteDeAgrupamentoLocal(int idNode);
     bool checkRelationship(Node *node1, Node *node2);
@@ -53,22 +57,14 @@ class Graph {
     void fechoTransitivoDireto(int id);
     void fechoTransitivoIndireto(int id);
 
-    int *depthSearch(Node *node);
-    void auxDepthSearch(Node *node, int visitedNodes[], int *counter);
-    Node *searchNodePkId(int id);
-
-    void printListAdjacents(int id);
-    int *getAllAdjacents(int id, int *cont);
-
+    void floyd(int idNodeOrig, int idNodeDest);
     void dijkstra(int idNodeOrig, int idNodeDest);
     int edgeCost(Node *nodeHead, Node *tailNode);
 
-    void floyd(int idNodeOrig, int idNodeDest);
-
+    int *depthSearch(Node *node);
+    void auxDepthSearch(Node *node, int visitedNodes[], int *counter);
     void treeDeepthSearch(Node *node);
     void auxTreeDeepthSearch(Node *node, vector<Node *> &visitedNodes, vector<Edge *> &mainTreeEdge, vector<Edge *> &returnTreeEdge);
-
-    void outputEdgeInducedSubgraph(string outputFileName, vector<Edge *> &subgraph);
 
    private:
     Node *firstNode;

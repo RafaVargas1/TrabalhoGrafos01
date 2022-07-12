@@ -46,6 +46,7 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
 
                 intHead = stoi(stringHead);
                 intTail = stoi(stringTail);
+                intEdgeWeight = 1;
             }
 
             Node *nodeHead = graph->createNodeIfDoesntExist(intHead, 0);
@@ -53,7 +54,7 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
 
             Edge *edge1 = graph->createEdge(nodeHead, nodeTail, intEdgeWeight);
             if (!isDirected)
-                Edge *edge2 = graph->createEdge(nodeTail, nodeHead, 0);
+                Edge *edge2 = graph->createEdge(nodeTail, nodeHead, intEdgeWeight);
         }
 
         delete textInLine;

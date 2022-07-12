@@ -213,24 +213,90 @@ void Graph::printNodes() {
 }
 
 /*
- * Função que encontra um nó já existente no grafo através de seu pkId ou retorna null,
- caso o id não corresponda a um nó existente
- *@params: int id: identificador do vértice a ser encontrado no grafo
- *
- *@return: um ponteiro para o objeto nó já previamente existente ou nullptr
+ * Função escreve o grafo de menor caminho no arquivo passado de acordo com os nós
+ *@params: string outputFileName: Nome do arquivo que será registrado o grafo
+ *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
+ *         bool isDirectedGraph: Informa se trata-se de um grafo direcionado
+ *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
+ *@return:
  ****************************************************************/
-Node* Graph::searchNodePkId(int id) {
-    Node* node = firstNode;
+void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
-    while (node != nullptr) {
-        if (node->getPkId() == id) {
-            return node;
-        }
-
-        node = node->getNextNode();
+    string title;
+    if (!getDirected()) {
+        title = "graph { \n";
+    } else {
+        title = "digraph { \n";
     }
 
-    return nullptr;
+    fwrite(title.c_str(), 1, title.size(), outfile);
+
+    int p = nodes.front();
+    nodes.pop();
+
+    while (!nodes.empty()) {
+        int q = nodes.front();
+        nodes.pop();
+
+        string nodeBase = std::to_string(p);
+        string nodeLinked = std::to_string(q);
+
+        int costEdge = edgeCost(getNodeIfExist(p), getNodeIfExist(q));
+        if (costEdge == -1)
+            continue;
+
+        // cout << "p: " << p << " q: " << q << " = " << costEdge << endl;
+
+        string dotNotation = "";
+
+        if (getWeighted()) {
+            string weight = std::to_string(costEdge);
+            if (!getDirected()) {
+                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+            } else {
+                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+            }
+        } else {
+            if (!getDirected()) {
+                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+            } else {
+                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
+            }
+        }
+
+        fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+
+        p = q;
+    }
+
+    string end = "}";
+
+    fwrite(end.c_str(), 1, end.size(), outfile);
+
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+}
+
+/*
+ * Função escreve o os nós passados em um arquivo
+ *@params: string outputFileName: Nome do arquivo que será registrado os nós
+ *         Node* nodes[]: conjuntos de nós resposta da operação realizada
+ *         int cont: contador de quantos nós há no array nodes
+ *         string textStart: texto inicial a ser escrito
+ *@return:
+ ****************************************************************/
+void Graph::outputNodes(string outputFileName, Node* nodes[], int cont, string textStart) {
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string text = string(textStart) + std::to_string(nodes[0]->getId()) + ": \n";
+    fwrite(text.c_str(), 1, text.size(), outfile);
+
+    for (int i = 1; i < cont; i++) {
+        text = std::to_string(nodes[i]->getId()) + string(",");
+        fwrite(text.c_str(), 1, text.size(), outfile);
+    }
+
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
 }
 
 /*
@@ -255,6 +321,27 @@ void Graph::printListAdjacents(int id) {
     };
 
     cout << "Fim" << endl;
+}
+
+/*
+ * Função que encontra um nó já existente no grafo através de seu pkId ou retorna null,
+ caso o id não corresponda a um nó existente
+ *@params: int id: identificador do vértice a ser encontrado no grafo
+ *
+ *@return: um ponteiro para o objeto nó já previamente existente ou nullptr
+ ****************************************************************/
+Node* Graph::getNodePkId(int id) {
+    Node* node = firstNode;
+
+    while (node != nullptr) {
+        if (node->getPkId() == id) {
+            return node;
+        }
+
+        node = node->getNextNode();
+    }
+
+    return nullptr;
 }
 
 /*
@@ -291,7 +378,7 @@ int* Graph::getAllAdjacents(int id, int* cont) {
  *@return:
  ****************************************************************/
 void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
-    string outputFileName = "CoeficienteDeAgrupamentoLocal.txt";
+    // string outputFileName = "CoeficienteDeAgrupamentoLocal.txt";
     int cont = 0, k = 0;
     float quociente = 0;
     int divisor, dividendo;
@@ -322,11 +409,12 @@ void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
         cout << "O coeficiente de agrupamento local eh: " << dividendo << "/" << divisor << " =~ " << quociente << endl;
     }
 
-    FILE* outfile = fopen(outputFileName.c_str(), "w+");
-
+    // FILE* outfile = fopen(outputFileName.c_str(), "w+");
+    /*
     string text = string("O coeficiente de agrupamento local eh: =~") + std::to_string(quociente) + "\n";
     fwrite(text.c_str(), 1, text.size(), outfile);
     cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+    */
 }
 
 /*
@@ -336,7 +424,7 @@ void Graph::coeficienteDeAgrupamentoLocal(int idNode) {
  *@return:
  ****************************************************************/
 void Graph::coeficienteDeAgrupamentoMedio() {
-    string outputFileName = "CoeficienteDeAgrupamentoMedio.txt";
+    // string outputFileName = "CoeficienteDeAgrupamentoMedio.txt";
     float quociente;
     int divisor, dividendo;
     int* allNodeAdjacents;
@@ -375,11 +463,13 @@ void Graph::coeficienteDeAgrupamentoMedio() {
 
     // coeficienteDeAgrupamento = coeficienteDeAgrupamento / getCounterOfNodes();
     cout << "O coeficiente de agrupamento médio eh: " << coeficienteDeAgrupamento << "/" << getCounterOfNodes() << " =~ " << coeficienteDeAgrupamento / getCounterOfNodes() << endl;
-    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+    // FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
+    /*
     string text = string("O coeficiente de agrupamento médio eh =~") + std::to_string(coeficienteDeAgrupamento / getCounterOfNodes());
     fwrite(text.c_str(), 1, text.size(), outfile);
     cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+    */
 }
 
 /*
@@ -436,13 +526,13 @@ void Graph::fechoTransitivoDireto(int id) {
             if (emptyClasp)
                 emptyClasp = 0;
 
-            nodes[cont] = searchNodePkId(i);
+            nodes[cont] = getNodePkId(i);
             cont++;
-            cout << searchNodePkId(i)->getId() << ", ";
+            cout << getNodePkId(i)->getId() << ", ";
         }
     }
 
-    output(outputFileName, nodes, cont, "Vertices que podem ser acessados atraves do no ");
+    // outputNodes(outputFileName, nodes, cont, "Vertices que podem ser acessados atraves do no ");
     if (emptyClasp)
         cout << "Fecho vazio" << endl;
 }
@@ -486,9 +576,177 @@ void Graph::fechoTransitivoIndireto(int id) {
         cout << nodes[i]->getId() << ", ";
     }
 
-    output(outputFileName, nodes, cont, "Vertices que chegam ao no ");
+    // outputNodes(outputFileName, nodes, cont, "Vertices que chegam ao no ");
     if (emptyClasp)
         cout << "Fecho vazio" << endl;
+}
+
+/*
+ * Função verifica o custo da aresta entre dois nós passados
+ *@params: Node* nodeHead: nó cuja aresta parte
+           Node* tailNode: nó cuja aresta chega
+ *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ ****************************************************************/
+int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
+    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
+        if (i->getTailNode() == tailNode)
+            return i->getWeight();
+    }
+
+    return -1;
+}
+
+/*
+ * Função imprime o valor do caminho de menor custo entre dois nós passados através do algoritmo de Dijkstra
+além de um arquivo AlgoritmoDijkstra.dot com o caminho em questão
+ *@params: int idNodeOrig: id do nó origem
+           int idNodeDest: id do nó destino
+ *@return:
+ ****************************************************************/
+void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
+    bool visitedNodes[getCounterOfNodes()];
+    int dist[getCounterOfNodes()];
+
+    // primeiro elemento do par é a distancia e o segundo o vértice
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    // queue<int> nodes;
+
+    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
+        dist[i] = -1;
+        visitedNodes[i] = false;
+    }
+
+    Node* nodeOrig = getNodeIfExist(idNodeOrig);
+    if (nodeOrig == nullptr) {
+        cout << "Vertice invalido" << endl;
+        return;
+    }
+
+    dist[nodeOrig->getPkId()] = 0;
+
+    pq.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
+    // nodes.push(nodeOrig->getId());
+
+    while (!pq.empty()) {
+        pair<int, int> p = pq.top();
+        int idNodeTop = p.second;
+        Node* nodeTop = getNodeIfExist(idNodeTop);
+
+        pq.pop();
+
+        if (visitedNodes[nodeTop->getPkId()] == false) {
+            visitedNodes[nodeTop->getPkId()] = true;
+
+            int cont = 0;
+            int* adjacents = getAllAdjacents(nodeTop->getId(), &cont);
+
+            for (int j = 0; j < cont; j++) {
+                Node* nodeAdjacent = getNodeIfExist(*(adjacents + j));
+
+                int costEdge = edgeCost(nodeTop, nodeAdjacent);
+                if (costEdge == -1)  // não existem aresta entre eles
+                    continue;
+
+                if (dist[nodeAdjacent->getPkId()] == -1 || dist[nodeAdjacent->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
+                    dist[nodeAdjacent->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
+
+                    // cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
+
+                    pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
+                    // nodes.push(nodeTop->getId());
+                }
+            }
+        }
+    }
+
+    Node* nodeDest = getNodeIfExist(idNodeDest);
+    // nodes.push(nodeDest->getId());
+
+    if (dist[nodeDest->getPkId()] == -1) {
+        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
+        return;
+    }
+
+    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
+
+    // outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
+}
+
+/*
+ * Função imprime o valor do caminho de minimo entre dois nós passados através do algoritmo de Floyd
+ além de um arquivo AlgoritmoFloyd.dot com o caminho em questão
+ *@params: int idNodeOrig: id do nó origem
+           int idNodeDest: id do nó destino
+ *@return:
+ ****************************************************************/
+void Graph::floyd(int idNodeOrig, int idNodeDest) {
+    Node* nodeOrig = getNodeIfExist(idNodeOrig);
+    Node* nodeDest = getNodeIfExist(idNodeDest);
+    int n = getCounterOfNodes();
+
+    // std::unordered_set<int> nodesSet;
+
+    // std::stack<int> nodesStack;
+    // std::queue<int> nodesQueue;
+
+    // primeiro elemento é o vertice cabeça e o segundo o verice cauda
+    int distance[n][n];
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            Node* nodeI = getNodePkId(i);
+            Node* nodeJ = getNodePkId(j);
+            int weight = edgeCost(nodeI, nodeJ);
+
+            distance[i][j] = weight;
+        }
+    }
+
+    for (int k = 1; k <= n; k++) {
+        for (int i = 1; i != nodeDest->getPkId(); i++) {
+            for (int j = 1; j <= n; j++) {
+                // cout << i << " -> " << j << " = " << distance[i][j] << endl;
+
+                if (distance[i][k] == -1 || distance[k][j] == -1 || i == k) {
+                    continue;
+                }
+
+                if (distance[i][j] > distance[i][k] + distance[k][j] || distance[i][j] == -1) {
+                    distance[i][j] = distance[i][k] + distance[k][j];
+                }
+
+                if (j == nodeDest->getPkId()) {
+                    // nodes.insert(make_pair(i, distance[j][i]));
+
+                    // nodesSet.insert(i);
+                    cout << "i: " << i << endl;
+                }
+            }
+        }
+    }
+
+    // nodesSet.insert(nodeDest->getPkId());
+
+    if (distance[nodeOrig->getPkId()][nodeDest->getPkId()] == -1) {
+        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
+        return;
+    }
+
+    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << distance[nodeOrig->getPkId()][nodeDest->getPkId()] << endl;
+
+    /*
+    for (auto i : nodesSet) {
+        nodesStack.push(i);
+        std::cout << i << std::endl;
+    }
+
+    while (!nodesStack.empty()) {
+        nodesQueue.push(nodesStack.top());
+        nodesStack.pop();
+    }
+
+    outputGraphSetOfNodes("AlgoritmoFloyd.dot", nodesQueue);
+    */
 }
 
 /*
@@ -531,183 +789,6 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
 
         edge = edge->getNextEdge();
     };
-}
-
-/*
- * Função escreve o os nós passados em um arquivo
- *@params: string outputFileName: Nome do arquivo que será registrado os nós
- *         Node* nodes[]: conjuntos de nós resposta da operação realizada
- *         int cont: contador de quantos nós há no array nodes
- *         string textStart: texto inicial a ser escrito
- *@return:
- ****************************************************************/
-void Graph::output(string outputFileName, Node* nodes[], int cont, string textStart) {
-    FILE* outfile = fopen(outputFileName.c_str(), "w+");
-
-    string text = string(textStart) + std::to_string(nodes[0]->getId()) + ": \n";
-    fwrite(text.c_str(), 1, text.size(), outfile);
-
-    for (int i = 1; i < cont; i++) {
-        text = std::to_string(nodes[i]->getId()) + string(",");
-        fwrite(text.c_str(), 1, text.size(), outfile);
-    }
-
-    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
-}
-
-/*
- * Função escreve o grafo de menor caminho no arquivo passado de acordo com os nós
- *@params: string outputFileName: Nome do arquivo que será registrado o grafo
- *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
- *         bool isDirectedGraph: Informa se trata-se de um grafo direcionado
- *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
- *@return:
- ****************************************************************/
-void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
-    FILE* outfile = fopen(outputFileName.c_str(), "w+");
-
-    string title;
-    if (!getDirected()) {
-        title = "graph { \n";
-    } else {
-        title = "digraph { \n";
-    }
-
-    fwrite(title.c_str(), 1, title.size(), outfile);
-
-    int p = nodes.front();
-    nodes.pop();
-
-    while (!nodes.empty()) {
-        int q = nodes.front();
-        nodes.pop();
-
-        string nodeBase = std::to_string(p);
-        string nodeLinked = std::to_string(q);
-
-        int costEdge = edgeCost(getNodeIfExist(p), getNodeIfExist(q));
-        if (costEdge == -1)
-            continue;
-
-        // cout << "p: " << p.second << " q: " << q.second << " = " << costEdge << endl;
-
-        string dotNotation = "";
-
-        if (getWeighted()) {
-            string weight = std::to_string(costEdge);
-            if (!getDirected()) {
-                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
-            } else {
-                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
-            }
-        } else {
-            if (!getDirected()) {
-                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
-            } else {
-                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
-            }
-        }
-
-        fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
-
-        p = q;
-    }
-
-    string end = "}";
-
-    fwrite(end.c_str(), 1, end.size(), outfile);
-
-    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
-}
-
-/*
- * Função verifica o custo da aresta entre dois nós passados
- *@params: Node* nodeHead: nó cuja aresta parte
-           Node* tailNode: nó cuja aresta chega
- *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
- ****************************************************************/
-int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
-    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
-        if (i->getTailNode() == tailNode)
-            return i->getWeight();
-    }
-
-    return -1;
-}
-
-/*
- * Função verifica o caminho de menor custo entre dois nós passados
- *@params: int idNodeOrig: id do nó origem
-           int idNodeDest: id do nó destino
- *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
- ****************************************************************/
-void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
-    bool visitedNodes[getCounterOfNodes()];
-    int dist[getCounterOfNodes()];
-
-    // primeiro elemento do par é a distancia e o segundo o vértice
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    queue<int> nodes;
-
-    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
-        dist[i] = -1;
-        visitedNodes[i] = false;
-    }
-
-    Node* nodeOrig = getNodeIfExist(idNodeOrig);
-    if (nodeOrig == nullptr) {
-        cout << "Vertice invalido" << endl;
-        return;
-    }
-
-    dist[nodeOrig->getPkId()] = 0;
-
-    pq.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
-    nodes.push(nodeOrig->getId());
-
-    while (!pq.empty()) {
-        pair<int, int> p = pq.top();
-        int idNodeTop = p.second;
-        Node* nodeTop = getNodeIfExist(idNodeTop);
-
-        pq.pop();
-
-        if (visitedNodes[nodeTop->getPkId()] == false) {
-            visitedNodes[nodeTop->getPkId()] = true;
-
-            int cont = 0;
-            int* adjacents = getAllAdjacents(nodeTop->getId(), &cont);
-
-            for (int j = 0; j < cont; j++) {
-                Node* nodeAdjacent = getNodeIfExist(*(adjacents + j));
-
-                int costEdge = edgeCost(nodeTop, nodeAdjacent);
-                if (costEdge == -1)  // não existem aresta entre eles
-                    continue;
-
-                if (dist[nodeAdjacent->getPkId()] == -1 || dist[nodeAdjacent->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
-                    dist[nodeAdjacent->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
-
-                    // cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
-
-                    pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
-                    nodes.push(nodeTop->getId());
-                }
-            }
-        }
-    }
-
-    Node* nodeDest = getNodeIfExist(idNodeDest);
-    nodes.push(nodeDest->getId());
-
-    if (dist[nodeDest->getPkId()] == -1) {
-        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
-        return;
-    }
-
-    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
-
-    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
 }
 
 /*
@@ -834,74 +915,4 @@ void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>& visitedNodes, vector<
             edge = edge->getNextEdge();
         }
     }
-}
-
-void Graph::floyd(int idNodeOrig, int idNodeDest) {
-    Node* nodeOrig = getNodeIfExist(idNodeOrig);
-    Node* nodeDest = getNodeIfExist(idNodeDest);
-    int n = getCounterOfNodes();
-
-    std::unordered_set<int> nodesSet;
-
-    std::stack<int> nodesStack;
-    std::queue<int> nodesQueue;
-
-    // primeiro elemento do par é a distancia e o segundo é o pkId do vértice
-    // vector<pair<int, int>> distance;
-    // primeiro elemento é o vertice cabeça e o segundo o verice cauda
-    int distance[n][n];
-
-    for (int i = 1; i <= n; i++) {
-        for (int j = 1; j <= n; j++) {
-            Node* nodeI = searchNodePkId(i);
-            Node* nodeJ = searchNodePkId(j);
-            int weight = edgeCost(nodeI, nodeJ);
-
-            distance[i][j] = weight;
-        }
-    }
-
-    for (int k = 1; k <= n; k++) {
-        for (int i = 1; i != nodeDest->getPkId(); i++) {
-            for (int j = 1; j <= n; j++) {
-                // cout << i << " -> " << j << " = " << distance[i][j] << endl;
-
-                if (distance[i][k] == -1 || distance[k][j] == -1 || i == k) {
-                    continue;
-                }
-
-                if (distance[i][j] > distance[i][k] + distance[k][j] || distance[i][j] == -1) {
-                    distance[i][j] = distance[i][k] + distance[k][j];
-                }
-
-                if (j == nodeDest->getPkId()) {
-                    // nodes.insert(make_pair(i, distance[j][i]));
-
-                    nodesSet.insert(i);
-                    cout << "i: " << i << endl;
-                }
-            }
-        }
-    }
-
-    nodesSet.insert(nodeDest->getPkId());
-
-    if (distance[nodeOrig->getPkId()][nodeDest->getPkId()] == -1) {
-        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
-        return;
-    }
-
-    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << distance[nodeOrig->getPkId()][nodeDest->getPkId()] << endl;
-
-    for (auto i : nodesSet) {
-        nodesStack.push(i);
-        std::cout << i << std::endl;
-    }
-
-    while (!nodesStack.empty()) {
-        nodesQueue.push(nodesStack.top());
-        nodesStack.pop();
-    }
-
-    outputGraphSetOfNodes("AlgoritmoFloyd.dot", nodesQueue);
 }
