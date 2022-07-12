@@ -22,12 +22,13 @@ using std::vector;
 using std::string;
 using std::vector;
 
-Graph::Graph(bool isDirected, bool hasWeightedEdge) {
+Graph::Graph(bool isDirected, bool hasWeightedEdge, bool hasWeightedNodes) {
     firstNode = nullptr;
     nodesTotal = 0;
     edgesTotal = 0;
-    weighted = isDirected;
-    directed = hasWeightedEdge;
+    directed = isDirected;
+    this->hasWeightedEdges = hasWeightedEdge;
+    this->hasWeightedNodes = hasWeightedNodes;
 }
 
 void Graph::addCounterOfNodes() {
@@ -54,8 +55,12 @@ Node* Graph::getFirstNode() {
     return firstNode;
 }
 
-bool Graph::getWeighted() {
-    return weighted;
+bool Graph::isEdgeWeighted() {
+    return hasWeightedEdges;
+}
+
+bool Graph::isNodeWeighted() {
+    return hasWeightedNodes;
 }
 
 bool Graph::getDirected() {
@@ -163,7 +168,7 @@ void Graph::outputGraph(string outputFileName) {
 
             string dotNotation = "";
 
-            if (getWeighted()) {
+            if (this->isEdgeWeighted()) {
                 string weight = std::to_string(edge->getWeight());
                 if (!getDirected()) {
                     dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
@@ -593,7 +598,7 @@ void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
 
         string dotNotation = "";
 
-        if (getWeighted()) {
+        if (this->isEdgeWeighted()) {
             string weight = std::to_string(costEdge);
             if (!getDirected()) {
                 dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
@@ -738,8 +743,8 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& subg
 }
 
 void Graph::treeDeepthSearch(Node* node) {
-    Graph* searchTree = new Graph(false, false);
-    Graph* returnTree = new Graph(false, false);
+    Graph* searchTree = new Graph(false, false, false);
+    Graph* returnTree = new Graph(false, false, false);
 
     /*
         -> visitedNodes - Auxiliar para marcar os nos visitados no caminhamento

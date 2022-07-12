@@ -13,8 +13,8 @@ using std::string;
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
 
-Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges) {
-    Graph *graph = new Graph(isDirected, hasWeightedEdges);
+Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges, bool hasWeightedNodes ) {
+    Graph *graph = new Graph(isDirected, hasWeightedEdges, hasWeightedNodes);
 
     const int lineSize = 50;
 
@@ -206,9 +206,8 @@ int main(int argc, char *argv[]) {
 
     if (!confirmEntry(fileName, path, hasWeightedEdge, hasWeightedNode, isDirected)) return 0;
 
-    Graph *graph = new Graph(isDirected, hasWeightedEdge);
 
-    graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge);
+    Graph *graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge, hasWeightedNode);
 
     processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
 

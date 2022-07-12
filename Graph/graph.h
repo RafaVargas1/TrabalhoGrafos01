@@ -21,7 +21,7 @@ class Edge;
 
 class Graph {
    public:
-    Graph(bool directed, bool weighted);
+    Graph(bool isDirected, bool hasWeightedEdge, bool hasWeightedNodes);
     ~Graph();
 
     void addCounterOfNodes();
@@ -33,7 +33,9 @@ class Graph {
     void setFirstNode(Node *node);
     Node *getFirstNode();
 
-    bool getWeighted();
+    // bool getWeighted();
+    bool isEdgeWeighted();
+    bool isNodeWeighted();
     bool getDirected();
 
     Node *getNodeIfExist(int id);
@@ -74,8 +76,9 @@ class Graph {
     Node *firstNode;
     int nodesTotal;
     int edgesTotal;
-    bool weighted;
+    bool hasWeightedEdges;
     bool directed;
+    bool hasWeightedNodes;
 };
 
 #endif
