@@ -5,8 +5,8 @@
 - Para executar o arquivo é necessário primeiro compilar o código e depois executá-lo. Os comandos para fazer isso através do terminal são respectivamente:
   
     ``` 
-    g++ main.cpp -o main
-    ./main grafo_1000_1.txt saida.txt 0 0 0
+    g++ main.cpp -o execGrupo26
+    ./execGrupo26 grafo_1000_1.txt saida.txt 0 0 0
     ```
     
  Obs.: A execução segue o padrão: 

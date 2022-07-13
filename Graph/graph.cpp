@@ -22,12 +22,13 @@ using std::vector;
 using std::string;
 using std::vector;
 
-Graph::Graph(bool isDirected, bool hasWeightedEdge) {
-    firstNode = nullptr;
-    nodesTotal = 0;
-    edgesTotal = 0;
-    weighted = isDirected;
-    directed = hasWeightedEdge;
+Graph::Graph(bool isDirected, bool hasWeightedEdge, bool hasWeightedNodes) {
+    this->firstNode = nullptr;
+    this->nodesTotal = 0;
+    this->edgesTotal = 0;
+    this->directed = isDirected;
+    this->hasWeightedEdges = hasWeightedEdge;
+    this->hasWeightedNodes = hasWeightedNodes;
 }
 
 void Graph::addCounterOfNodes() {
@@ -54,8 +55,12 @@ Node* Graph::getFirstNode() {
     return firstNode;
 }
 
-bool Graph::getWeighted() {
-    return weighted;
+bool Graph::isEdgeWeighted() {
+    return hasWeightedEdges;
+}
+
+bool Graph::isNodeWeighted() {
+    return hasWeightedNodes;
 }
 
 bool Graph::getDirected() {
@@ -163,7 +168,7 @@ void Graph::outputGraph(string outputFileName) {
 
             string dotNotation = "";
 
-            if (getWeighted()) {
+            if (this->isEdgeWeighted()) {
                 string weight = std::to_string(edge->getWeight());
                 if (!getDirected()) {
                     dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
@@ -250,7 +255,7 @@ void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
 
         string dotNotation = "";
 
-        if (getWeighted()) {
+        if (this->isEdgeWeighted()) {
             string weight = std::to_string(costEdge);
             if (!getDirected()) {
                 dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
@@ -792,6 +797,161 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
 }
 
 /*
+ * Função escreve o grafo de menor caminho no arquivo passado de acordo com os nós
+ *@params: string outputFileName: Nome do arquivo que será registrado o grafo
+ *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
+ *         bool isDirectedGraph: Informa se trata-se de um grafo direcionado
+ *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
+ *@return:
+ ****************************************************************/
+void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
+    FILE* outfile = fopen(outputFileName.c_str(), "w+");
+
+    string title;
+    if (!getDirected()) {
+        title = "graph { \n";
+    } else {
+        title = "digraph { \n";
+    }
+
+    fwrite(title.c_str(), 1, title.size(), outfile);
+
+    int p = nodes.front();
+    nodes.pop();
+
+    while (!nodes.empty()) {
+        int q = nodes.front();
+        nodes.pop();
+
+        string nodeBase = std::to_string(p);
+        string nodeLinked = std::to_string(q);
+
+        int costEdge = edgeCost(getNodeIfExist(p), getNodeIfExist(q));
+        if (costEdge == -1)
+            continue;
+
+        // cout << "p: " << p.second << " q: " << q.second << " = " << costEdge << endl;
+
+        string dotNotation = "";
+
+        if (this->isEdgeWeighted()) {
+            string weight = std::to_string(costEdge);
+            if (!getDirected()) {
+                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+            } else {
+                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+            }
+        } else {
+            if (!getDirected()) {
+                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+            } else {
+                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
+            }
+        }
+
+        fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+
+        p = q;
+    }
+
+    string end = "}";
+
+    fwrite(end.c_str(), 1, end.size(), outfile);
+
+    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
+}
+
+/*
+ * Função verifica o custo da aresta entre dois nós passados
+ *@params: Node* nodeHead: nó cuja aresta parte
+           Node* tailNode: nó cuja aresta chega
+ *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ ****************************************************************/
+int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
+    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
+        if (i->getTailNode() == tailNode)
+            return i->getWeight();
+    }
+
+    return -1;
+}
+
+/*
+ * Função verifica o caminho de menor custo entre dois nós passados
+ *@params: int idNodeOrig: id do nó origem
+           int idNodeDest: id do nó destino
+ *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
+ ****************************************************************/
+void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
+    bool visitedNodes[getCounterOfNodes()];
+    int dist[getCounterOfNodes()];
+
+    // primeiro elemento do par é a distancia e o segundo o vértice
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    queue<int> nodes;
+
+    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
+        dist[i] = -1;
+        visitedNodes[i] = false;
+    }
+
+    Node* nodeOrig = getNodeIfExist(idNodeOrig);
+    if (nodeOrig == nullptr) {
+        cout << "Vertice invalido" << endl;
+        return;
+    }
+
+    dist[nodeOrig->getPkId()] = 0;
+
+    pq.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
+    nodes.push(nodeOrig->getId());
+
+    while (!pq.empty()) {
+        pair<int, int> p = pq.top();
+        int idNodeTop = p.second;
+        Node* nodeTop = getNodeIfExist(idNodeTop);
+
+        pq.pop();
+
+        if (visitedNodes[nodeTop->getPkId()] == false) {
+            visitedNodes[nodeTop->getPkId()] = true;
+
+            int cont = 0;
+            int* adjacents = getAllAdjacents(nodeTop->getId(), &cont);
+
+            for (int j = 0; j < cont; j++) {
+                Node* nodeAdjacent = getNodeIfExist(*(adjacents + j));
+
+                int costEdge = edgeCost(nodeTop, nodeAdjacent);
+                if (costEdge == -1)  // não existem aresta entre eles
+                    continue;
+
+                if (dist[nodeAdjacent->getPkId()] == -1 || dist[nodeAdjacent->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
+                    dist[nodeAdjacent->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
+
+                    // cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
+
+                    pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
+                    nodes.push(nodeTop->getId());
+                }
+            }
+        }
+    }
+
+    Node* nodeDest = getNodeIfExist(idNodeDest);
+    nodes.push(nodeDest->getId());
+
+    if (dist[nodeDest->getPkId()] == -1) {
+        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
+        return;
+    }
+
+    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
+
+    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
+}
+
+/*
  * Faz o output em .dot a partir de um vector de vertices
  *@params: string outputFileName: Nome do arquivo de saida
  *         vector<Edge*>&subgraph: Subgrafo vertice induzido. No vetor estara somente as referencias as arestas
@@ -818,9 +978,15 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& subg
     cout << "O arquivo " << outputFileName << " foi gerado com sucesso. Para visualizar encerre a execucao" << endl;
 }
 
+/*
+ * Parte de um no e visita os nós que formam a arvores de busca em profundidade
+ * @params: Node* node Referencia ao no de inicio em que a busca em profundidade ira comecar
+ *
+ *@return:
+ ****************************************************************/
 void Graph::treeDeepthSearch(Node* node) {
-    Graph* searchTree = new Graph(false, false);
-    Graph* returnTree = new Graph(false, false);
+    Graph* searchTree = new Graph(false, false, false);
+    Graph* returnTree = new Graph(false, false, false);
 
     /*
         -> visitedNodes - Auxiliar para marcar os nos visitados no caminhamento
@@ -840,39 +1006,14 @@ void Graph::treeDeepthSearch(Node* node) {
 }
 
 /*
- * Funcao que verifica se uma aresta esta dentro de um vetor de arestas
- *@params: vector<Edge*>&edgeVector: Referencia a um vetor de arestas
- *         Edge edge: Aresta a ser testada
+ * Executa de fato a recursividade e passa de no em no verificando os visitados e os que ainda nao foram visitados
+ * @params: Node* node - No de onde a arvore parte
+ *          vector<Node*>& visitedNodes - Nos ja visitados 
+ *          vector<Edge*>& mainTreeEdge - Aresta da arvore principal
+ *          vector<Edge*>& returnTreeEdge - Arestas de retorno
  *
- *@return: True se edge esta em edgeVector false se nao
+ *@return:
  ****************************************************************/
-bool isEdgeInVector(vector<Edge*>& edgeVector, Edge* edge) {
-    for (int i = 0; i < edgeVector.size(); i++) {
-        if (edgeVector[i] == edge) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/*
- * Funcao que verifica se um no esta dentro de um vetor de nos
- *@params: vector<Edge*>&nodeVector: Referencia a um vetor de nos
- *         Edge node: No a ser testada
- *
- *@return: True se no esta em nodeVector false se nao
- ****************************************************************/
-bool isNodeVisited(vector<Node*>& nodeVector, Node* node) {
-    for (int i = 0; i < nodeVector.size(); i++) {
-        if (nodeVector[i] == node) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>& visitedNodes, vector<Edge*>& mainTreeEdge, vector<Edge*>& returnTreeEdge) {
     if (!isNodeVisited(visitedNodes, node)) {
         visitedNodes.emplace_back(node);
@@ -916,3 +1057,39 @@ void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>& visitedNodes, vector<
         }
     }
 }
+
+
+/*
+ * Funcao que verifica se uma aresta esta dentro de um vetor de arestas
+ *@params: vector<Edge*>&edgeVector: Referencia a um vetor de arestas
+ *         Edge edge: Aresta a ser testada
+ *
+ *@return: True se edge esta em edgeVector false se nao
+ ****************************************************************/
+bool isEdgeInVector(vector<Edge*>& edgeVector, Edge* edge) {
+    for (int i = 0; i < edgeVector.size(); i++) {
+        if (edgeVector[i] == edge) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+ * Funcao que verifica se um no esta dentro de um vetor de nos
+ *@params: vector<Edge*>&nodeVector: Referencia a um vetor de nos
+ *         Edge node: No a ser testada
+ *
+ *@return: True se no esta em nodeVector false se nao
+ ****************************************************************/
+bool isNodeVisited(vector<Node*>& nodeVector, Node* node) {
+    for (int i = 0; i < nodeVector.size(); i++) {
+        if (nodeVector[i] == node) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
