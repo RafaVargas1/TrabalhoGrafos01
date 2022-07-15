@@ -102,8 +102,9 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "(6) Coeficiente de Agrupamento Medio" << endl;
     cout << "(7) Output do grafo no formato .dot" << endl;
     cout << "(8) Arvore gerada pela ordem da busca em profundidade" << endl;
-    cout << "(9) Caminho mínimo pelo Algoritmo de Dijkstra" << endl;
-    cout << "(10) Caminho mínimo pelo Algoritmo de Floyd" << endl;
+    cout << "(9) Caminho minimo pelo Algoritmo de Dijkstra" << endl;
+    cout << "(10) Caminho minimo pelo Algoritmo de Floyd" << endl;
+    cout << "(11) Algoritmo de Kruskal" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
@@ -157,6 +158,9 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             cout << "Floyd de qual no de destino?" << endl;
             cin >> noDest;
             graph->floyd(no, noDest);
+            break;
+        case 11:
+            graph->kruskal(argv[2]);
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);

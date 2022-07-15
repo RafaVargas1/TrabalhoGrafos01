@@ -90,6 +90,24 @@ Node* Graph::getNodeIfExist(int id) {
     return nullptr;
 }
 
+
+bool Graph::isNodeInGraph(Node* searchedNode){
+      Node* node = this->firstNode;
+
+    if (node == nullptr) return false;
+
+    while (node != nullptr) {
+        if (node == searchedNode) {
+            return true;
+        }
+
+        node = node->getNextNode();
+    }
+
+    return false;
+}
+
+
 /*
  * Função que cria o nó caso ele ainda não exista no grafo
  *@params: int id: identificador do vértice a ser criado
@@ -120,6 +138,7 @@ Node* Graph::createNodeIfDoesntExist(int id, int weight) {
  ****************************************************************/
 Edge* Graph::createEdge(Node* nodeHead, Node* nodeTail, int weight) {
     Edge* newEdge = new Edge(nodeHead, nodeTail, weight, this);
+    this->vectorOfEdges.emplace_back(newEdge);
 
     Edge* nodeFirstEdge = nodeHead->getFirstEdge();
 
@@ -137,7 +156,29 @@ Edge* Graph::createEdge(Node* nodeHead, Node* nodeTail, int weight) {
 }
 
 /*
- * Função escreve o grafo no arquivo passado
+ * Função verifica se um Edge já esta no grafo. Verifica também se a versão inversa 
+ * da aresta esta no grafo, uma vez que por definição de enunciado do problemas isso 
+ * nao pode existir
+ *@params: vector<Edge*> insertedEdges: Vetor de arestas onde será testado
+ *         Edge* edge: Aresta que se deseja verificar
+ *@return: bool isInserted: Se a aresta esta no vetor de arestas
+ ****************************************************************/
+bool edgeIsInserted(vector<Edge*> insertedEdges, Edge* edge){
+    bool isInserted = false;
+    for (int i=0; i < insertedEdges.size() && !isInserted; i++){
+        if (
+            insertedEdges[i] == edge || 
+            (insertedEdges[i]->getTailNode() == edge->getHeadNode() && insertedEdges[i]->getHeadNode() == edge->getTailNode() )){
+            isInserted = true;
+        }
+    }
+
+    return isInserted;
+}
+
+/*
+ * Função escreve o grafo no arquivo passado. Obs.: Retira as arestas duplicadas
+ * dos grafos nao direcionados
  *@params: string outputFileName: Nome do arquivo que será registrado o grafo
  *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
  *@return:
@@ -148,7 +189,7 @@ void Graph::outputGraph(string outputFileName) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
     string title;
-    if (!getDirected()) {
+    if (!this->getDirected()) {
         title = "graph { \n";
     } else {
         title = "digraph { \n";
@@ -156,10 +197,10 @@ void Graph::outputGraph(string outputFileName) {
 
     fwrite(title.c_str(), 1, title.size(), outfile);
 
+    vector<Edge*> insertedEdges;
+
     while (node != nullptr) {
         Edge* edge = node->getFirstEdge();
-
-        // cout << "No " << node->getId() << " In: " << node->getGrauIn() << " - Out: "<< node->getGrauOut() << endl;
 
         while (edge != nullptr) {
             // Id da Aresta (Linha do arquivo em que a aresta é criada)
@@ -170,14 +211,20 @@ void Graph::outputGraph(string outputFileName) {
 
             if (this->isEdgeWeighted()) {
                 string weight = std::to_string(edge->getWeight());
-                if (!getDirected()) {
-                    dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+                if (!this->getDirected()) {
+                    if(!edgeIsInserted(insertedEdges, edge) ){
+                        dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
+                        insertedEdges.emplace_back(edge);
+                    }
                 } else {
                     dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
                 }
             } else {
-                if (!getDirected()) {
-                    dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+                if (!this->getDirected()) {
+                    if(!edgeIsInserted(insertedEdges, edge) ){
+                        dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+                        insertedEdges.emplace_back(edge);
+                    }
                 } else {
                     dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
                 }
@@ -797,161 +844,6 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
 }
 
 /*
- * Função escreve o grafo de menor caminho no arquivo passado de acordo com os nós
- *@params: string outputFileName: Nome do arquivo que será registrado o grafo
- *         bool isWeightedGraph: Informa se trata-se de um grafo ponderado
- *         bool isDirectedGraph: Informa se trata-se de um grafo direcionado
- *         queue<pair<int, int>> nodes: Lista contendo os vértices do caminho mínimo encontrado
- *@return:
- ****************************************************************/
-void Graph::outputGraphSetOfNodes(string outputFileName, queue<int> nodes) {
-    FILE* outfile = fopen(outputFileName.c_str(), "w+");
-
-    string title;
-    if (!getDirected()) {
-        title = "graph { \n";
-    } else {
-        title = "digraph { \n";
-    }
-
-    fwrite(title.c_str(), 1, title.size(), outfile);
-
-    int p = nodes.front();
-    nodes.pop();
-
-    while (!nodes.empty()) {
-        int q = nodes.front();
-        nodes.pop();
-
-        string nodeBase = std::to_string(p);
-        string nodeLinked = std::to_string(q);
-
-        int costEdge = edgeCost(getNodeIfExist(p), getNodeIfExist(q));
-        if (costEdge == -1)
-            continue;
-
-        // cout << "p: " << p.second << " q: " << q.second << " = " << costEdge << endl;
-
-        string dotNotation = "";
-
-        if (this->isEdgeWeighted()) {
-            string weight = std::to_string(costEdge);
-            if (!getDirected()) {
-                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
-            } else {
-                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + " [weight=\"" + string(weight) + "\"] [label=\"" + string(weight) + "\"];\n";
-            }
-        } else {
-            if (!getDirected()) {
-                dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
-            } else {
-                dotNotation = string(nodeBase) + "->" + string(nodeLinked) + ";\n";
-            }
-        }
-
-        fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
-
-        p = q;
-    }
-
-    string end = "}";
-
-    fwrite(end.c_str(), 1, end.size(), outfile);
-
-    cout << "O arquivo " << outputFileName << " foi gerado com sucesso.";
-}
-
-/*
- * Função verifica o custo da aresta entre dois nós passados
- *@params: Node* nodeHead: nó cuja aresta parte
-           Node* tailNode: nó cuja aresta chega
- *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
- ****************************************************************/
-int Graph::edgeCost(Node* nodeHead, Node* tailNode) {
-    for (Edge* i = nodeHead->getFirstEdge(); i != nullptr; i = i->getNextEdge()) {
-        if (i->getTailNode() == tailNode)
-            return i->getWeight();
-    }
-
-    return -1;
-}
-
-/*
- * Função verifica o caminho de menor custo entre dois nós passados
- *@params: int idNodeOrig: id do nó origem
-           int idNodeDest: id do nó destino
- *@return: retorna o valor do custo da aresta (-1 caso não haja aresta)
- ****************************************************************/
-void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
-    bool visitedNodes[getCounterOfNodes()];
-    int dist[getCounterOfNodes()];
-
-    // primeiro elemento do par é a distancia e o segundo o vértice
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    queue<int> nodes;
-
-    for (int i = 0; i < getCounterOfNodes() + 1; i++) {
-        dist[i] = -1;
-        visitedNodes[i] = false;
-    }
-
-    Node* nodeOrig = getNodeIfExist(idNodeOrig);
-    if (nodeOrig == nullptr) {
-        cout << "Vertice invalido" << endl;
-        return;
-    }
-
-    dist[nodeOrig->getPkId()] = 0;
-
-    pq.push(make_pair(dist[nodeOrig->getPkId()], nodeOrig->getId()));
-    nodes.push(nodeOrig->getId());
-
-    while (!pq.empty()) {
-        pair<int, int> p = pq.top();
-        int idNodeTop = p.second;
-        Node* nodeTop = getNodeIfExist(idNodeTop);
-
-        pq.pop();
-
-        if (visitedNodes[nodeTop->getPkId()] == false) {
-            visitedNodes[nodeTop->getPkId()] = true;
-
-            int cont = 0;
-            int* adjacents = getAllAdjacents(nodeTop->getId(), &cont);
-
-            for (int j = 0; j < cont; j++) {
-                Node* nodeAdjacent = getNodeIfExist(*(adjacents + j));
-
-                int costEdge = edgeCost(nodeTop, nodeAdjacent);
-                if (costEdge == -1)  // não existem aresta entre eles
-                    continue;
-
-                if (dist[nodeAdjacent->getPkId()] == -1 || dist[nodeAdjacent->getPkId()] > (dist[nodeTop->getPkId()] + costEdge)) {
-                    dist[nodeAdjacent->getPkId()] = dist[nodeTop->getPkId()] + costEdge;
-
-                    // cout << nodeTop->getId() << " -> " << nodeAdjacent->getId() << " = " << dist[nodeAdjacent->getPkId()] << endl;
-
-                    pq.push(make_pair(dist[nodeAdjacent->getPkId()], nodeAdjacent->getId()));
-                    nodes.push(nodeTop->getId());
-                }
-            }
-        }
-    }
-
-    Node* nodeDest = getNodeIfExist(idNodeDest);
-    nodes.push(nodeDest->getId());
-
-    if (dist[nodeDest->getPkId()] == -1) {
-        cout << "Nao eh possivel chegar do no " << idNodeOrig << " ao no " << idNodeDest << endl;
-        return;
-    }
-
-    cout << "A distancia do no " << idNodeOrig << " ao no " << idNodeDest << " eh de: " << dist[nodeDest->getPkId()] << endl;
-
-    outputGraphSetOfNodes("AlgoritmoDijkstra.dot", nodes);
-}
-
-/*
  * Faz o output em .dot a partir de um vector de vertices
  *@params: string outputFileName: Nome do arquivo de saida
  *         vector<Edge*>&subgraph: Subgrafo vertice induzido. No vetor estara somente as referencias as arestas
@@ -1006,6 +898,42 @@ void Graph::treeDeepthSearch(Node* node) {
 }
 
 /*
+ * Funcao que verifica se uma aresta esta dentro de um vetor de arestas
+ *@params: vector<Edge*>&edgeVector: Referencia a um vetor de arestas
+ *         Edge edge: Aresta a ser testada
+ *
+ *@return: True se edge esta em edgeVector false se nao
+ ****************************************************************/
+bool isEdgeInVector(vector<Edge*>& edgeVector, Edge* edge) {
+    for (int i = 0; i < edgeVector.size(); i++) {
+        if (edgeVector[i] == edge) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/*
+ * Funcao que verifica se um no esta dentro de um vetor de nos
+ *@params: vector<Edge*>&nodeVector: Referencia a um vetor de nos
+ *         Edge node: No a ser testada
+ *
+ *@return: True se no esta em nodeVector false se nao
+ ****************************************************************/
+bool isNodeVisited(vector<Node*>& nodeVector, Node* node) {
+    for (int i = 0; i < nodeVector.size(); i++) {
+        if (nodeVector[i] == node) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/*
  * Executa de fato a recursividade e passa de no em no verificando os visitados e os que ainda nao foram visitados
  * @params: Node* node - No de onde a arvore parte
  *          vector<Node*>& visitedNodes - Nos ja visitados 
@@ -1058,38 +986,146 @@ void Graph::auxTreeDeepthSearch(Node* node, vector<Node*>& visitedNodes, vector<
     }
 }
 
-
 /*
- * Funcao que verifica se uma aresta esta dentro de um vetor de arestas
- *@params: vector<Edge*>&edgeVector: Referencia a um vetor de arestas
- *         Edge edge: Aresta a ser testada
- *
- *@return: True se edge esta em edgeVector false se nao
+ * Dados dois nós verifica se eles são conexos através de busca em profundidade
+ *@params: Node* node1: Nó de partida
+           Node* node2: No em que se deseja chega
+           vector<Node*>& visitedNodes: Nos que foram visitados na busca em profundidade
+           bool* isCycle: Referencia que diz se os nos forma um ciclo ou não
+ *@return:
  ****************************************************************/
-bool isEdgeInVector(vector<Edge*>& edgeVector, Edge* edge) {
-    for (int i = 0; i < edgeVector.size(); i++) {
-        if (edgeVector[i] == edge) {
-            return true;
+void areNodesInTheGraph(Node* node1, Node* node2, vector<Node*>& visitedNodes, bool* isCycle){
+    if (*isCycle == true) return;
+
+    Edge* edge = node1->getFirstEdge();
+    visitedNodes.emplace_back(node1);
+
+    while (edge != nullptr) {
+        
+        if (edge->getTailNode() == node2){
+            *isCycle = true;
+        } else if (!isNodeVisited(visitedNodes, edge->getTailNode())) { 
+            areNodesInTheGraph(edge->getTailNode(), node2, visitedNodes, isCycle);
         }
+
+        edge = edge->getNextEdge();
+
     }
 
-    return false;
 }
 
 /*
- * Funcao que verifica se um no esta dentro de um vetor de nos
- *@params: vector<Edge*>&nodeVector: Referencia a um vetor de nos
- *         Edge node: No a ser testada
- *
- *@return: True se no esta em nodeVector false se nao
+ * Função auxiliar ordernar um vetor de arestas atraves de merge sort
+ *@params: vector<Edge *>& vector: vetor de aretas a ser ordenado
+           int start: posicao inicial
+           int mid: meio do vetor
+           int end: final do vetor
+ *@return:
  ****************************************************************/
-bool isNodeVisited(vector<Node*>& nodeVector, Node* node) {
-    for (int i = 0; i < nodeVector.size(); i++) {
-        if (nodeVector[i] == node) {
-            return true;
+void mergeSortedIntervals(vector<Edge*>& vetor, int start, int mid, int end) {
+	
+	vector<Edge*> temp;
+
+	int i, j;
+	i = start;
+	j = mid + 1;
+
+	while (i <= mid && j <= end) {
+
+		if (vetor[i]->getWeight() <= vetor[j]->getWeight()) {
+			temp.push_back(vetor[i]);
+			++i;
+		}
+		else {
+			temp.push_back(vetor[j]);
+			++j;
+		}
+
+	}
+
+	while (i <= mid) {
+		temp.push_back(vetor[i]);
+		++i;
+	}
+
+	while (j <= end) {
+		temp.push_back(vetor[j]);
+		++j;
+	}
+
+	for (int i = start; i <= end; ++i)
+		vetor[i] = temp[i - start];
+
+}
+
+/*
+ * Função para ordernar um vetor de arestas atraves de merge sort
+ *@params: vector<Edge *>& vector: vetor de aretas a ser ordenado
+           int start: posicao inicial
+           int end: final do vetor
+ *@return:
+ ****************************************************************/
+void mergeSort(vector<Edge *>& vetor, int start, int end) {
+	if (start < end) {
+		int mid = (start + end) / 2;
+		mergeSort(vetor, start, mid);
+		mergeSort(vetor, mid + 1, end);
+		mergeSortedIntervals(vetor, start, mid, end);
+	} 
+
+ 
+}
+
+/*
+ * Função para gerar a arvore de caminho minimo atraves do algoritmo de kruskal
+ * Ordena as aresta, e faz um algoritmo guloso que evita criação de ciclos 
+ * para gerar a arvore resultante
+ *@params: string outputFileName: Nome do arquivo em que sera printado a arvore
+ *@return:
+ ****************************************************************/
+void Graph::kruskal(string outputFileName){
+    if (!this->hasWeightedEdges) return;
+
+
+    mergeSort( this->vectorOfEdges, 0, this->vectorOfEdges.size() - 1);
+
+    Edge* smallestEdge = this->vectorOfEdges[0];
+
+
+    Graph* kruskalMinimumTree = new Graph(this->getDirected(), this->isEdgeWeighted(), this->isNodeWeighted());
+
+
+    for (int i=0; i < this->vectorOfEdges.size(); i++) {
+        Edge* edge = this->vectorOfEdges[i];
+        Node* head = edge->getHeadNode();
+        Node* tail = edge->getTailNode();
+
+        Node* kruskalTreeHeadNode = kruskalMinimumTree->getNodeIfExist(head->getId());
+        Node* kruskalTreeTailNode = kruskalMinimumTree->getNodeIfExist(tail->getId());
+
+        if (kruskalTreeHeadNode != nullptr && kruskalTreeTailNode == nullptr){
+            kruskalTreeTailNode = kruskalMinimumTree->createNodeIfDoesntExist(tail->getId(), tail->getWeight());
+            kruskalMinimumTree->createEdge(kruskalTreeHeadNode, kruskalTreeTailNode, edge->getWeight());
+        } else if (kruskalTreeHeadNode == nullptr && kruskalTreeTailNode != nullptr){
+            kruskalTreeHeadNode = kruskalMinimumTree->createNodeIfDoesntExist(head->getId(), head->getWeight());
+            kruskalMinimumTree->createEdge(kruskalTreeHeadNode, kruskalTreeTailNode, edge->getWeight());
+        } else if (kruskalTreeHeadNode == nullptr && kruskalTreeTailNode == nullptr){
+            kruskalTreeHeadNode = kruskalMinimumTree->createNodeIfDoesntExist(head->getId(), head->getWeight());
+            kruskalTreeTailNode = kruskalMinimumTree->createNodeIfDoesntExist(tail->getId(), tail->getWeight());
+            kruskalMinimumTree->createEdge(kruskalTreeHeadNode, kruskalTreeTailNode, edge->getWeight());
+        } else if (kruskalTreeHeadNode != nullptr && kruskalTreeTailNode != nullptr){
+       
+            vector<Node*> visitedNodes;
+            bool nodesCreateCycle = false;
+            areNodesInTheGraph(kruskalTreeHeadNode, kruskalTreeTailNode, visitedNodes, &nodesCreateCycle);
+
+            if (!nodesCreateCycle){
+                kruskalMinimumTree->createEdge(kruskalTreeHeadNode, kruskalTreeTailNode, edge->getWeight());
+            }           
+
         }
     }
 
-    return false;
+    kruskalMinimumTree->outputGraph(outputFileName);
 }
 

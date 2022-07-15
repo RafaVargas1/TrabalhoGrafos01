@@ -67,6 +67,13 @@ class Graph {
     void treeDeepthSearch(Node *node);
     void auxTreeDeepthSearch(Node *node, vector<Node *> &visitedNodes, vector<Edge *> &mainTreeEdge, vector<Edge *> &returnTreeEdge);
 
+    void kruskal(string outputFileName);
+    vector<Edge*> edgesMergeSort(vector<Edge*>& edgesToBeMerged);
+
+    bool isNodeInGraph(Node* searchedNode);
+    Edge* insertEdge(Edge* edge);
+    Node* insertNode(Node* node);
+
    private:
     Node *firstNode;
     int nodesTotal;
@@ -74,6 +81,7 @@ class Graph {
     bool hasWeightedEdges;
     bool directed;
     bool hasWeightedNodes;
+    vector<Edge*> vectorOfEdges;
 };
 
 #endif
