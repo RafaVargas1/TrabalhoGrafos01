@@ -1129,3 +1129,35 @@ void Graph::kruskal(string outputFileName){
     kruskalMinimumTree->outputGraph(outputFileName);
 }
 
+void Graph::prim(string outputFileName){
+    vector<Edge*> listOfAdjacents;
+
+    Node* startNode = this->getFirstNode(); 
+
+    Graph* primTree = new Graph(this->getDirected(), this->isEdgeWeighted(), this->isNodeWeighted()); 
+
+    auxPrim(listOfAdjacents, startNode, primTree);
+
+    primTree->outputGraph(outputFileName);
+}
+
+Edge* cheaperEdge(vector<Edge*> listOfEdges){
+    
+}
+
+void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph){
+	if (primGraph->getCounterOfNodes() == this->getCounterOfNode() ) {
+		return;
+	}
+
+	vector<Edge*> tempVector = nodeBase->getAdjacents();
+	listOfAdjacents.emplace_back(tempVector);
+
+	Edge* cheaperEdge =  returnCheaperEdge(listOfAdjacents);
+	removeEdgeFromList(listOfAdjacents, cheaperEdge);
+
+	Node* tailNode = primGraph->createNode(cheaperEdge->getTailNode()->getId());
+	primGraph->createEdge(nodeBase, tailNode);
+
+	auxPrim(listOfAdjacents, tailNode, primGraph);
+}

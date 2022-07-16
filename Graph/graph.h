@@ -74,6 +74,8 @@ class Graph {
     Edge* insertEdge(Edge* edge);
     Node* insertNode(Node* node);
 
+    void prim(string outputFileName);
+
    private:
     Node *firstNode;
     int nodesTotal;

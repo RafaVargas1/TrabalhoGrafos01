@@ -105,6 +105,7 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "(9) Caminho minimo pelo Algoritmo de Dijkstra" << endl;
     cout << "(10) Caminho minimo pelo Algoritmo de Floyd" << endl;
     cout << "(11) Algoritmo de Kruskal" << endl;
+    cout << "(12) Algoritmo de Prim" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
@@ -161,6 +162,9 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             break;
         case 11:
             graph->kruskal(argv[2]);
+            break;
+        case 12:
+            graph->prim(argv[2]);
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
