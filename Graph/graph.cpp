@@ -20,7 +20,6 @@ using std::queue;
 using std::vector;
 
 using std::string;
-using std::vector;
 
 Graph::Graph(bool isDirected, bool hasWeightedEdge, bool hasWeightedNodes) {
     this->firstNode = nullptr;
@@ -1129,6 +1128,66 @@ void Graph::kruskal(string outputFileName){
     kruskalMinimumTree->outputGraph(outputFileName);
 }
 
+
+int getIndexOfCheaperEdge(vector<Edge*> listOfAdjacents){
+    int listSize = (listOfAdjacents).size();
+
+    if (listSize < 1){
+        return 0;
+    }
+
+    int cheaperIndex = 0;
+
+    for (int i=1; i < listSize; i++){
+        if (listOfAdjacents[i]->getWeight() < listOfAdjacents[cheaperIndex]->getWeight()){
+            cheaperIndex = i;
+        }
+    } 
+
+    return cheaperIndex;
+}
+
+void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph){
+	if (primGraph->getCounterOfNodes() == this->getCounterOfNodes()) {
+		return;
+	}
+
+    bool isNodeBaseInSolution = primGraph->isNodeInGraph(nodeBase);
+   
+    if (!isNodeBaseInSolution){
+	    vector<Edge*> tempVector = nodeBase->getAdjacentsEdges();
+	    listOfAdjacents.insert(listOfAdjacents.end(), tempVector.begin(), tempVector.end());
+    }
+    
+	int cheaperEdgeIndex =  getIndexOfCheaperEdge(listOfAdjacents);
+    Edge* cheaperEdge = listOfAdjacents[cheaperEdgeIndex];
+    listOfAdjacents.erase(listOfAdjacents.begin() + cheaperEdgeIndex);
+
+
+    // Verifica se forma um ciclo
+    bool nodesCreateCycle = false;
+    vector<Node*> visitedNodes;
+
+    Node* no1 = primGraph->createNodeIfDoesntExist(nodeBase->getId(), nodeBase->getWeight());
+    Node* auxNode = cheaperEdge->getTailNode();
+    Node* no2 = primGraph->createNodeIfDoesntExist(auxNode->getId(), auxNode->getWeight());
+
+    areNodesInTheGraph(no1, no2, visitedNodes, &nodesCreateCycle);
+
+    cout << nodesCreateCycle;
+
+    if (nodesCreateCycle){
+        // Como a aresta foi retirada da lista de adjacentes nao cria um looping
+        this->auxPrim(listOfAdjacents, nodeBase, primGraph);
+    } else {
+        cout << "inseriu" << endl;
+      
+        primGraph->createEdge(no1, no2, cheaperEdge->getWeight());
+        this->auxPrim(listOfAdjacents, cheaperEdge->getTailNode(), primGraph);
+    }
+
+}
+
 void Graph::prim(string outputFileName){
     vector<Edge*> listOfAdjacents;
 
@@ -1142,22 +1201,5 @@ void Graph::prim(string outputFileName){
 }
 
 Edge* cheaperEdge(vector<Edge*> listOfEdges){
-    
-}
 
-void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph){
-	if (primGraph->getCounterOfNodes() == this->getCounterOfNode() ) {
-		return;
-	}
-
-	vector<Edge*> tempVector = nodeBase->getAdjacents();
-	listOfAdjacents.emplace_back(tempVector);
-
-	Edge* cheaperEdge =  returnCheaperEdge(listOfAdjacents);
-	removeEdgeFromList(listOfAdjacents, cheaperEdge);
-
-	Node* tailNode = primGraph->createNode(cheaperEdge->getTailNode()->getId());
-	primGraph->createEdge(nodeBase, tailNode);
-
-	auxPrim(listOfAdjacents, tailNode, primGraph);
 }
