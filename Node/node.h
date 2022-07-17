@@ -2,9 +2,13 @@
 #define NODE_H
 
 #include <iostream>
+#include <vector>
+
 
 #include "../Edge/edge.h"
 #include "../Graph/graph.h"
+
+using std::vector;
 
 class Edge;
 class Graph;
@@ -34,6 +38,7 @@ class Node {
     int getGrauOut();
 
     int getWeight();
+    vector<Edge*> getAdjacentsEdges();
 
    private:
     int pk;  // Primary Key = ID Único

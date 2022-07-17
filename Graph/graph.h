@@ -74,6 +74,9 @@ class Graph {
     Edge* insertEdge(Edge* edge);
     Node* insertNode(Node* node);
 
+    void prim(string outputFileName);
+    void auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph, vector<Node*> visitedNodes);
+
    private:
     Node *firstNode;
     int nodesTotal;
