@@ -21,7 +21,7 @@ class Edge;
 
 class Graph {
    public:
-    Graph(bool directed, bool weighted);
+    Graph(bool isDirected, bool hasWeightedEdge, bool hasWeightedNodes);
     ~Graph();
 
     void addCounterOfNodes();
@@ -33,7 +33,8 @@ class Graph {
     void setFirstNode(Node *node);
     Node *getFirstNode();
 
-    bool getWeighted();
+    bool isEdgeWeighted();
+    bool isNodeWeighted();
     bool getDirected();
 
     int *getAllAdjacents(int id, int *cont);
@@ -66,12 +67,21 @@ class Graph {
     void treeDeepthSearch(Node *node);
     void auxTreeDeepthSearch(Node *node, vector<Node *> &visitedNodes, vector<Edge *> &mainTreeEdge, vector<Edge *> &returnTreeEdge);
 
+    void kruskal(string outputFileName);
+    vector<Edge*> edgesMergeSort(vector<Edge*>& edgesToBeMerged);
+
+    bool isNodeInGraph(Node* searchedNode);
+    Edge* insertEdge(Edge* edge);
+    Node* insertNode(Node* node);
+
    private:
     Node *firstNode;
     int nodesTotal;
     int edgesTotal;
-    bool weighted;
+    bool hasWeightedEdges;
     bool directed;
+    bool hasWeightedNodes;
+    vector<Edge*> vectorOfEdges;
 };
 
 #endif
