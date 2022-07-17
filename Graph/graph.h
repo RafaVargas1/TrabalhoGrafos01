@@ -47,7 +47,7 @@ class Graph {
     void outputGraph(string outputFileName);
     void outputNodes(string outputFileName, Node *nodes[], int cont, string textStart);
     void outputGraphSetOfNodes(string outputFileName, std::queue<int> nodes);
-    void outputEdgeInducedSubgraph(string outputFileName, vector<Edge *> &subgraph);
+    void outputEdgeInducedSubgraph(string outputFileName, vector<Edge *> &searchTree, vector<Edge *> &returnEdges);
     void printListAdjacents(int id);
     void printNodes();
 
@@ -64,7 +64,7 @@ class Graph {
 
     int *depthSearch(Node *node);
     void auxDepthSearch(Node *node, int visitedNodes[], int *counter);
-    void treeDeepthSearch(Node *node);
+    void treeDeepthSearch(Node *node, string outputFileName);
     void auxTreeDeepthSearch(Node *node, vector<Node *> &visitedNodes, vector<Edge *> &mainTreeEdge, vector<Edge *> &returnTreeEdge);
 
     void kruskal(string outputFileName);

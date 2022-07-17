@@ -144,7 +144,7 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
         case 8:
             cout << "A partir de qual no?" << endl;
             cin >> no;
-            graph->treeDeepthSearch(graph->getNodeIfExist(no));
+            graph->treeDeepthSearch(graph->getNodeIfExist(no), argv[2]);
             break;
         case 9:
             cout << "Dijkstra de qual no de origem?" << endl;

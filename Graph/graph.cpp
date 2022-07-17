@@ -849,7 +849,7 @@ void Graph::auxDepthSearch(Node* node, int visitedNodes[], int* cont) {
  *
  *@return:
  ****************************************************************/
-void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& subgraph) {
+void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& searchTree, vector<Edge*>& returnEdges) {
     FILE* outfile = fopen(outputFileName.c_str(), "w+");
 
     string title = "graph { \n";
@@ -857,11 +857,35 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& subg
 
     string dotNotation = "";
 
-    for (int i = 0; i < subgraph.size(); i++) {
-        string nodeBase = std::to_string(subgraph[i]->getHeadNode()->getId());
-        string nodeLinked = std::to_string(subgraph[i]->getTailNode()->getId());
-        dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
-        fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+    vector<Edge*> auxInsertedEdgesInTree;
+    vector<Edge*> auxInsertedEdgesInReturn;
+
+    for (int i = 0; i < searchTree.size(); i++) {
+        Edge* edge = searchTree[i];
+
+        if (!edgeIsInserted(auxInsertedEdgesInTree, edge)){
+            auxInsertedEdgesInTree.emplace_back(edge);
+
+            string nodeBase = std::to_string(edge->getHeadNode()->getId());
+            string nodeLinked = std::to_string(edge->getTailNode()->getId());
+            dotNotation = string(nodeBase) + "--" + string(nodeLinked) + ";\n";
+            fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+        }
+        
+    }
+
+    for (int i = 0; i < returnEdges.size(); i++) {
+        Edge* edge = returnEdges[i];
+
+        if (!edgeIsInserted(auxInsertedEdgesInReturn, edge)){
+            auxInsertedEdgesInReturn.emplace_back(edge);
+            
+            string nodeBase = std::to_string(edge->getHeadNode()->getId());
+            string nodeLinked = std::to_string(edge->getTailNode()->getId());
+            dotNotation = string(nodeBase) + "--" + string(nodeLinked) + " [dir=none color=red];\n";
+            fwrite(dotNotation.c_str(), 1, dotNotation.size(), outfile);
+        }
+        
     }
 
     string end = "}";
@@ -875,7 +899,7 @@ void Graph::outputEdgeInducedSubgraph(string outputFileName, vector<Edge*>& subg
  *
  *@return:
  ****************************************************************/
-void Graph::treeDeepthSearch(Node* node) {
+void Graph::treeDeepthSearch(Node* node, string outputFileName) {
     Graph* searchTree = new Graph(false, false, false);
     Graph* returnTree = new Graph(false, false, false);
 
@@ -892,8 +916,7 @@ void Graph::treeDeepthSearch(Node* node) {
 
     auxTreeDeepthSearch(node, visitedNodes, mainTreeEdge, returnTreeEdge);
 
-    this->outputEdgeInducedSubgraph("arvore.dot", mainTreeEdge);
-    this->outputEdgeInducedSubgraph("arestasRetorno.dot", returnTreeEdge);
+    this->outputEdgeInducedSubgraph(outputFileName, mainTreeEdge, returnTreeEdge);
 }
 
 /*
