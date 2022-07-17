@@ -1129,61 +1129,80 @@ void Graph::kruskal(string outputFileName){
 }
 
 
-int getIndexOfCheaperEdge(vector<Edge*> listOfAdjacents){
+vector<Edge*> findAndRemoveCheaperEdge(Edge* &referenceCheaperEdge, vector<Edge*> listOfAdjacents){
+   
     int listSize = (listOfAdjacents).size();
 
-    if (listSize < 1){
-        return 0;
+    if (listSize <= 1){
+        referenceCheaperEdge = listOfAdjacents[0];
+        listOfAdjacents.erase(listOfAdjacents.begin() + 0);
+
+        return listOfAdjacents;
     }
 
-    int cheaperIndex = 0;
+
+    referenceCheaperEdge =  listOfAdjacents[0];
+
+    int positionCheaper = 0;
+    int positionCheaperReturn = 0;
 
     for (int i=1; i < listSize; i++){
-        if (listOfAdjacents[i]->getWeight() < listOfAdjacents[cheaperIndex]->getWeight()){
-            cheaperIndex = i;
+        if (listOfAdjacents[i]->getWeight() < referenceCheaperEdge->getWeight()){
+            referenceCheaperEdge = listOfAdjacents[i];
+            positionCheaper = i;
+        } else if (listOfAdjacents[i]->getTailNode() == referenceCheaperEdge->getHeadNode() || listOfAdjacents[i]->getHeadNode() == referenceCheaperEdge->getTailNode()){
+            positionCheaperReturn = i;
         }
     } 
 
-    return cheaperIndex;
+    listOfAdjacents.erase(listOfAdjacents.begin() + positionCheaper);
+
+    if (positionCheaperReturn != 0)
+        listOfAdjacents.erase(listOfAdjacents.begin() + positionCheaperReturn - 1);
+
+    return listOfAdjacents;
 }
 
-void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph){
+void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph, vector<Node*> visitedNodes ){
 	if (primGraph->getCounterOfNodes() == this->getCounterOfNodes()) {
 		return;
 	}
-
-    bool isNodeBaseInSolution = primGraph->isNodeInGraph(nodeBase);
    
-    if (!isNodeBaseInSolution){
-	    vector<Edge*> tempVector = nodeBase->getAdjacentsEdges();
-	    listOfAdjacents.insert(listOfAdjacents.end(), tempVector.begin(), tempVector.end());
+    if (!isNodeVisited(visitedNodes, nodeBase)){
+        visitedNodes.emplace_back(nodeBase);
+        // Pega a lista de adjacencia do grafo de origem 
+	    vector<Edge*> tempVector = this->getNodeIfExist(nodeBase->getId())->getAdjacentsEdges();
+   	    
+        if (listOfAdjacents.size() > 0){
+            listOfAdjacents.insert(listOfAdjacents.end(), tempVector.begin(), tempVector.end());
+        } else {
+            listOfAdjacents = tempVector;
+        }
+   
     }
-    
-	int cheaperEdgeIndex =  getIndexOfCheaperEdge(listOfAdjacents);
-    Edge* cheaperEdge = listOfAdjacents[cheaperEdgeIndex];
-    listOfAdjacents.erase(listOfAdjacents.begin() + cheaperEdgeIndex);
 
+    Edge* cheaperEdge = nullptr;
+    listOfAdjacents = findAndRemoveCheaperEdge(cheaperEdge, listOfAdjacents);
+ 
 
     // Verifica se forma um ciclo
     bool nodesCreateCycle = false;
-    vector<Node*> visitedNodes;
+    vector<Node*> nodesInSolution;
 
-    Node* no1 = primGraph->createNodeIfDoesntExist(nodeBase->getId(), nodeBase->getWeight());
-    Node* auxNode = cheaperEdge->getTailNode();
-    Node* no2 = primGraph->createNodeIfDoesntExist(auxNode->getId(), auxNode->getWeight());
+    Node* cheaperHead = cheaperEdge->getHeadNode();
+    Node* cheaperTail = cheaperEdge->getTailNode();
 
-    areNodesInTheGraph(no1, no2, visitedNodes, &nodesCreateCycle);
+    Node* no1 = primGraph->createNodeIfDoesntExist(cheaperHead->getId(), cheaperHead->getWeight());
+    Node* no2 = primGraph->createNodeIfDoesntExist(cheaperTail->getId(), cheaperTail->getWeight());
 
-    cout << nodesCreateCycle;
+    areNodesInTheGraph(no1, no2, nodesInSolution, &nodesCreateCycle);
 
     if (nodesCreateCycle){
         // Como a aresta foi retirada da lista de adjacentes nao cria um looping
-        this->auxPrim(listOfAdjacents, nodeBase, primGraph);
+        this->auxPrim(listOfAdjacents, nodeBase, primGraph, visitedNodes);
     } else {
-        cout << "inseriu" << endl;
-      
         primGraph->createEdge(no1, no2, cheaperEdge->getWeight());
-        this->auxPrim(listOfAdjacents, cheaperEdge->getTailNode(), primGraph);
+        this->auxPrim(listOfAdjacents, no2, primGraph, visitedNodes);
     }
 
 }
@@ -1194,8 +1213,9 @@ void Graph::prim(string outputFileName){
     Node* startNode = this->getFirstNode(); 
 
     Graph* primTree = new Graph(this->getDirected(), this->isEdgeWeighted(), this->isNodeWeighted()); 
+    vector<Node*> visitedNodes;
 
-    auxPrim(listOfAdjacents, startNode, primTree);
+    this->auxPrim(listOfAdjacents, startNode, primTree, visitedNodes);
 
     primTree->outputGraph(outputFileName);
 }
