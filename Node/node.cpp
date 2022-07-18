@@ -58,3 +58,16 @@ int Node::getWeight() {
     return this->weight;
 }
 
+vector<Edge*> Node::getAdjacentsEdges(){
+    vector<Edge*> vectorOfAdjacentsEdges;
+
+    Edge* edge = this->getFirstEdge();
+
+    while(edge != nullptr){
+        vectorOfAdjacentsEdges.emplace_back(edge);
+
+        edge = edge->getNextEdge();
+    }
+
+    return vectorOfAdjacentsEdges;
+}   

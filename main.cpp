@@ -13,8 +13,8 @@ using std::string;
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
 
-Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges) {
-    Graph *graph = new Graph(isDirected, hasWeightedEdges);
+Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges, bool hasWeightedNodes ) {
+    Graph *graph = new Graph(isDirected, hasWeightedEdges, hasWeightedNodes);
 
     const int lineSize = 50;
 
@@ -102,8 +102,10 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "(6) Coeficiente de Agrupamento Medio" << endl;
     cout << "(7) Output do grafo no formato .dot" << endl;
     cout << "(8) Arvore gerada pela ordem da busca em profundidade" << endl;
-    cout << "(9) Caminho mínimo pelo Algoritmo de Dijkstra" << endl;
-    cout << "(10) Caminho mínimo pelo Algoritmo de Floyd" << endl;
+    cout << "(9) Caminho minimo pelo Algoritmo de Dijkstra" << endl;
+    cout << "(10) Caminho minimo pelo Algoritmo de Floyd" << endl;
+    cout << "(11) Algoritmo de Kruskal" << endl;
+    cout << "(12) Algoritmo de Prim" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
@@ -158,6 +160,12 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             cin >> noDest;
             graph->floyd(no, noDest);
             break;
+        case 11:
+            graph->kruskal(argv[2]);
+            break;
+        case 12:
+            graph->prim(argv[2]);
+            break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
             break;
@@ -207,9 +215,8 @@ int main(int argc, char *argv[]) {
 
     if (!confirmEntry(fileName, path, hasWeightedEdge, hasWeightedNode, isDirected)) return 0;
 
-    Graph *graph = new Graph(isDirected, hasWeightedEdge);
 
-    graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge);
+    Graph *graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge, hasWeightedNode);
 
     processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
 
