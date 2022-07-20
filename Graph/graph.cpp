@@ -1091,7 +1091,6 @@ void Graph::kruskal(string outputFileName){
 
     Graph* kruskalMinimumTree = new Graph(this->getDirected(), this->isEdgeWeighted(), this->isNodeWeighted());
 
-
     for (int i=0; i < this->vectorOfEdges.size(); i++) {
         Edge* edge = this->vectorOfEdges[i];
         Node* head = edge->getHeadNode();
@@ -1126,7 +1125,12 @@ void Graph::kruskal(string outputFileName){
     kruskalMinimumTree->outputGraph(outputFileName);
 }
 
-
+/*
+ * Funçao que acha a aresta mais barata em um vetor de arestas e remove ela
+ *@params: &referenceCheaperEdge: Referencia onde ira ficar a aresta mais barata da lista
+           vector<Edge*> listOfAdjacents: lista onde sera buscada a aresta mais barata
+ *@return: vector<Edge*> : Retorna o vetor de arestas atualizado. Sem a aresta de maior valor
+ ****************************************************************/
 vector<Edge*> findAndRemoveCheaperEdge(Edge* &referenceCheaperEdge, vector<Edge*> listOfAdjacents){
    
     int listSize = (listOfAdjacents).size();
@@ -1161,6 +1165,19 @@ vector<Edge*> findAndRemoveCheaperEdge(Edge* &referenceCheaperEdge, vector<Edge*
     return listOfAdjacents;
 }
 
+
+/*
+ * Funçao auxiliar do algoritmo de prim. Onde o processamento ocorre de fato. Pega um novo no 
+ que nao tenha sido visitado, pega as arestas adjacentes a esse no, coloca na lista, 
+ verifica dentre essa lista qual a aresta de menor valor. Verifica se essa aresta de menor valor
+ se liga a um nó que já esta no grafo, se nao insere na solucao;
+ *@params: - vector<Edge*> listOfAdjacents: Lista das arestas adjacentes ao nos que estao na solucao
+           - Node* nodeBase: No sendo analisado atualmente
+           - Graph* primGraph: Grafo de solucao
+           - vector<Node*> visitedNodes: Listagem de nos que ja tem seus adjacentes na lista
+           de adjacentes (listOfAdjacents)
+ *@return: 
+ ****************************************************************/
 void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primGraph, vector<Node*> visitedNodes ){
 	if (primGraph->getCounterOfNodes() == this->getCounterOfNodes()) {
 		return;
@@ -1183,8 +1200,7 @@ void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primG
     listOfAdjacents = findAndRemoveCheaperEdge(cheaperEdge, listOfAdjacents);
  
 
-    // Verifica se forma um ciclo
-    bool nodesCreateCycle = false;
+    bool isNodeInGraph = false;
     vector<Node*> nodesInSolution;
 
     Node* cheaperHead = cheaperEdge->getHeadNode();
@@ -1193,9 +1209,9 @@ void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primG
     Node* no1 = primGraph->createNodeIfDoesntExist(cheaperHead->getId(), cheaperHead->getWeight());
     Node* no2 = primGraph->createNodeIfDoesntExist(cheaperTail->getId(), cheaperTail->getWeight());
 
-    areNodesInTheGraph(no1, no2, nodesInSolution, &nodesCreateCycle);
+    areNodesInTheGraph(no1, no2, nodesInSolution, &isNodeInGraph);
 
-    if (nodesCreateCycle){
+    if (isNodeInGraph){
         // Como a aresta foi retirada da lista de adjacentes nao cria um looping
         this->auxPrim(listOfAdjacents, nodeBase, primGraph, visitedNodes);
     } else {
@@ -1205,6 +1221,12 @@ void Graph::auxPrim (vector<Edge*> listOfAdjacents, Node* nodeBase, Graph* primG
 
 }
 
+
+/*
+ * Funcao base do algoritmo de prim, chama a auxiliar e printa o resultado
+ *@params: outputFileName: Nome do arquivo em que saira o resultado
+ *@return: 
+ ****************************************************************/
 void Graph::prim(string outputFileName){
     vector<Edge*> listOfAdjacents;
 
@@ -1212,12 +1234,10 @@ void Graph::prim(string outputFileName){
 
     Graph* primTree = new Graph(this->getDirected(), this->isEdgeWeighted(), this->isNodeWeighted()); 
     vector<Node*> visitedNodes;
-
+   
     this->auxPrim(listOfAdjacents, startNode, primTree, visitedNodes);
 
     primTree->outputGraph(outputFileName);
 }
 
-Edge* cheaperEdge(vector<Edge*> listOfEdges){
 
-}
