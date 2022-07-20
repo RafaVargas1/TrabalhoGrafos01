@@ -13,7 +13,7 @@ using std::string;
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
 
-Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges, bool hasWeightedNodes ) {
+Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges, bool hasWeightedNodes) {
     Graph *graph = new Graph(isDirected, hasWeightedEdges, hasWeightedNodes);
 
     const int lineSize = 50;
@@ -94,18 +94,19 @@ bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWe
 void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeightedEdge, bool isDirected, Graph *graph) {
     int option;
     cout << "\nDigite a funcionalidade que deseja para o grafo inserido: " << endl;
-    cout << "(1) Print lista de adjacencia" << endl;
-    cout << "(2) Print nodes" << endl;
-    cout << "(3) Fecho Transitivo Direto" << endl;
-    cout << "(4) Fecho Transitivo Indireto" << endl;
-    cout << "(5) Coeficiente de Agrupamento Local" << endl;
-    cout << "(6) Coeficiente de Agrupamento Medio" << endl;
-    cout << "(7) Output do grafo no formato .dot" << endl;
-    cout << "(8) Arvore gerada pela ordem da busca em profundidade" << endl;
-    cout << "(9) Caminho minimo pelo Algoritmo de Dijkstra" << endl;
-    cout << "(10) Caminho minimo pelo Algoritmo de Floyd" << endl;
-    cout << "(11) Algoritmo de Kruskal" << endl;
-    cout << "(12) Algoritmo de Prim" << endl;
+
+    cout << "(1) Fecho Transitivo Direto" << endl;
+    cout << "(2) Fecho Transitivo Indireto" << endl;
+    cout << "(3) Coeficiente de Agrupamento Local" << endl;
+    cout << "(4) Coeficiente de Agrupamento Medio" << endl;
+    cout << "(5) Caminho minimo pelo Algoritmo de Dijkstra" << endl;
+    cout << "(6) Caminho minimo pelo Algoritmo de Floyd" << endl;
+    cout << "(7) Algoritmo de Prim" << endl;
+    cout << "(8) Algoritmo de Kruskal" << endl;
+    cout << "(9) Arvore gerada pela ordem da busca em profundidade" << endl;
+    cout << "(10) Output do grafo no formato .dot" << endl;
+    cout << "(11) Print lista de adjacencia" << endl;
+    cout << "(12) Print nodes" << endl;
     cout << "-> ";
     cin >> option;
     cout << "\n";
@@ -113,58 +114,58 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     int no, noDest;
     switch (option) {
         case 1:
-            cout << "Lista de adjacencia de qual no?" << endl;
-            cin >> no;
-            graph->printListAdjacents(no);
-            break;
-        case 2:
-            graph->printNodes();
-            break;
-        case 3:
             cout << "Fecho Transitivo Direto de qual no?" << endl;
             cin >> no;
             graph->fechoTransitivoDireto(no);
             break;
-        case 4:
+        case 2:
             cout << "Fecho Transitivo Indireto de qual no?" << endl;
             cin >> no;
             graph->fechoTransitivoIndireto(no);
             break;
-        case 5:
+        case 3:
             cout << "Coeficiente de Agrupamento Local de qual no?" << endl;
             cin >> no;
             graph->coeficienteDeAgrupamentoLocal(no);
             break;
-        case 6:
+        case 4:
             graph->coeficienteDeAgrupamentoMedio();
             break;
-        case 7:
-            graph->outputGraph(argv[2]);
-            break;
-        case 8:
-            cout << "A partir de qual no?" << endl;
-            cin >> no;
-            graph->treeDeepthSearch(graph->getNodeIfExist(no));
-            break;
-        case 9:
+        case 5:
             cout << "Dijkstra de qual no de origem?" << endl;
             cin >> no;
             cout << "Dijkstra de qual no de destino?" << endl;
             cin >> noDest;
             graph->dijkstra(no, noDest);
             break;
-        case 10:
+        case 6:
             cout << "Floyd de qual no de origem?" << endl;
             cin >> no;
             cout << "Floyd de qual no de destino?" << endl;
             cin >> noDest;
             graph->floyd(no, noDest);
             break;
-        case 11:
+        case 7:
+            graph->prim(argv[2]);
+            break;
+        case 8:
             graph->kruskal(argv[2]);
             break;
+        case 9:
+            cout << "A partir de qual no?" << endl;
+            cin >> no;
+            graph->treeDeepthSearch(graph->getNodeIfExist(no));
+            break;
+        case 10:
+            graph->outputGraph(argv[2]);
+            break;
+        case 11:
+            cout << "Lista de adjacencia de qual no?" << endl;
+            cin >> no;
+            graph->printListAdjacents(no);
+            break;
         case 12:
-            graph->prim(argv[2]);
+            graph->printNodes();
             break;
         default:
             processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
@@ -214,7 +215,6 @@ int main(int argc, char *argv[]) {
         perror("Erro ao abrir o arquivo");
 
     if (!confirmEntry(fileName, path, hasWeightedEdge, hasWeightedNode, isDirected)) return 0;
-
 
     Graph *graph = graphReadAndInstantiation(file, isDirected, hasWeightedEdge, hasWeightedNode);
 

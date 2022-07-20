@@ -658,7 +658,7 @@ void Graph::dijkstra(int idNodeOrig, int idNodeDest) {
     bool visitedNodes[getCounterOfNodes()];
     int dist[getCounterOfNodes()];
 
-    // primeiro elemento do par é a distancia e o segundo o vértice
+    //* primeiro elemento do par é a distancia e o segundo o vértice
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
     // queue<int> nodes;
 
@@ -740,7 +740,7 @@ void Graph::floyd(int idNodeOrig, int idNodeDest) {
     // std::stack<int> nodesStack;
     // std::queue<int> nodesQueue;
 
-    // primeiro elemento é o vertice cabeça e o segundo o verice cauda
+    //* primeiro elemento é o vertice cabeça e o segundo o verice cauda
     int distance[n][n];
 
     for (int i = 1; i <= n; i++) {
@@ -767,8 +767,6 @@ void Graph::floyd(int idNodeOrig, int idNodeDest) {
                 }
 
                 if (j == nodeDest->getPkId()) {
-                    // nodes.insert(make_pair(i, distance[j][i]));
-
                     // nodesSet.insert(i);
                     cout << "i: " << i << endl;
                 }
