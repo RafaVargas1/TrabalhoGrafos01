@@ -1,7 +1,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sstream>
 #include <iostream>
 
 using std::cin;
@@ -63,6 +63,78 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
     return graph;
 }
 
+Graph* graphNodeInduced(string nodes, Graph* originalGraph){
+    std::istringstream aux { nodes };
+
+    Graph* graph = new Graph(originalGraph->getDirected(), originalGraph->isEdgeWeighted(), originalGraph->isNodeWeighted());
+
+    string node;
+    vector<Node*> vectorNodes;
+    while ( std::getline(aux, node, ',')){
+        int nodeInt = stoi(node);
+
+        Node* originalNode = originalGraph->getNodeIfExist(nodeInt);
+        vectorNodes.push_back(originalNode);
+
+        graph->createNodeIfDoesntExist( nodeInt, originalNode->getId() );
+    }
+
+    for (int i=0; i < vectorNodes.size(); i++){
+        int cont = 0;
+        int* adjacents = originalGraph->getAllAdjacents( vectorNodes[i]->getId() , &cont);
+
+        for (int j=0; j < cont; j++){
+
+            Node* node = graph->getNodeIfExist(adjacents[j]);
+
+            if (node != nullptr){
+            
+                Edge* edge = vectorNodes[i]->getFirstEdge();
+               
+               while (edge != nullptr && edge->getTailNode()->getId() != node->getId()) {
+                    edge = edge->getNextEdge();
+                } 
+
+                if (edge != nullptr){
+                    Edge *edge1 = graph->createEdge(vectorNodes[i], node, edge->getWeight());
+                    Edge *edge2 = graph->createEdge(node, vectorNodes[i], edge->getWeight());
+                }
+            }
+           
+        }
+    }
+
+    return graph;
+}
+
+Graph* processGraphNodeInduced(Graph* originalGraph){
+    int option;
+    cout << "Defina os nos a serem considerados: " << endl;
+
+    cout << "(0) Todos os nos (Grafo completo)" << endl;
+    cout << "(1) Nos especificos" << endl;
+    cin >> option;
+
+    string nodes;
+    switch (option){
+    case 0:
+        return originalGraph;
+        break;
+    case 1:
+        cout << "Defina os nos pelo ID separados por virgula" << endl;
+        cout << "Exemplo: 1,2,3" << endl;
+        cin >> nodes;  
+        return graphNodeInduced(nodes, originalGraph);;
+        break;
+    default:
+        cout << "Opcao invalida" << endl;
+        return processGraphNodeInduced(originalGraph);
+        break;
+    }
+ 
+    
+}
+
 bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWeightedNode, bool isDirected) {
     int confirmation;
 
@@ -112,6 +184,8 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "\n";
 
     int no, noDest;
+    Graph* newGraph;
+
     switch (option) {
         case 1:
             cout << "Fecho Transitivo Direto de qual no?" << endl;
@@ -146,10 +220,12 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             graph->floyd(no, noDest);
             break;
         case 7:
-            graph->prim(argv[2]);
+            newGraph = processGraphNodeInduced(graph);
+            newGraph->prim(argv[2]);
             break;
         case 8:
-            graph->kruskal(argv[2]);
+            newGraph = processGraphNodeInduced(graph);
+            newGraph->kruskal(argv[2]);
             break;
         case 9:
             cout << "A partir de qual no?" << endl;
