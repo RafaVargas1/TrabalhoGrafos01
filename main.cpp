@@ -13,6 +13,15 @@ using std::string;
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
 
+
+/*
+ * Lê e instancia o grafo a partir do arquivo escrito 
+ * @params: FILE *file: arquivo de onde o grafo sera lido
+ *          bool isDirected: se o grafo é direcionado
+ *          bool hasWeightedEdges: se o grafo tem peso nas arestas
+ *          bool hasWeightedNodes: se o grafo tem peso nos nos
+ * @return: Graph*: Grafo final instaciado 
+ ****************************************************************/
 Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges, bool hasWeightedNodes) {
     Graph *graph = new Graph(isDirected, hasWeightedEdges, hasWeightedNodes);
 
@@ -63,6 +72,14 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
     return graph;
 }
 
+/*
+ * Pega o subgrafo vertice induzido por escrito e faz a instaciação dele 
+ * basedo no grafo origingal
+ * @params: Graph* originalGraph: grafo base a partir do qual sera gerado o subgrafo
+ *          string nodes: String que descreve o vertice induzido
+ * @return: Graph*: subgrafo resultante, podendo ser o grafo original 
+ * ou um subgrafo vertice induzido digitado pelo usuario
+ ****************************************************************/
 Graph* graphNodeInduced(string nodes, Graph* originalGraph){
     std::istringstream aux { nodes };
 
@@ -107,6 +124,13 @@ Graph* graphNodeInduced(string nodes, Graph* originalGraph){
     return graph;
 }
 
+/*
+ * Recebe um grafo e permite que o usuario pegue um subgrafo vertice 
+ * induzido desse grafo
+ * @params: originalGraph: grafo base a partir do qual sera gerado o subgrafo
+ * @return: Graph*: subgrafo resultante, podendo ser o grafo original 
+ * ou um subgrafo vertice induzido digitado pelo usuario
+ ****************************************************************/
 Graph* processGraphNodeInduced(Graph* originalGraph){
     int option;
     cout << "Defina os nos a serem considerados: " << endl;
@@ -135,6 +159,16 @@ Graph* processGraphNodeInduced(Graph* originalGraph){
     
 }
 
+/*
+ * Exibe os detalhes da entrada por escrito de forma descritiva 
+ * e permite que o usuario confirme ou nao essa entrada.
+ * @params: string fileName: nome do arquivo
+ *          string path: caminho ate o arquivo
+ *          bool hasWeightedEdge: se o grafo tem peso nas arestas
+ *          bool hasWeightedNode: se o grafo tem peso nos nos
+ *          bool isDirected: se o grafo é direcionado
+ * @return: bool: Se o usuário confirma a entrada
+ ****************************************************************/
 bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWeightedNode, bool isDirected) {
     int confirmation;
 
@@ -163,6 +197,15 @@ bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWe
     return false;
 }
 
+/*
+ * Exibe e processa os opções e escolhas
+ * @params: char *argv[]: lista de argumentos
+ *          bool hasWeightedNode: se o grafo tem peso nos nos
+ *          bool hasWeightedEdge: se o grafo tem peso nas arestas
+ *          bool isDirected: se o grafo e direcionado
+ *          Graph *graph: grafo já instanciado
+ * @return:
+ ****************************************************************/
 void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeightedEdge, bool isDirected, Graph *graph) {
     int option;
     cout << "\nDigite a funcionalidade que deseja para o grafo inserido: " << endl;
@@ -256,6 +299,13 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     if (option == 1) processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
 }
 
+
+/*
+ * Funcao principal, faz as leituras dos argumentos passados na linha de comentado
+ * @params: argc: numero de arumentos
+ *          argv: argumentos 
+ * @return:
+ ****************************************************************/
 int main(int argc, char *argv[]) {
     FILE *file;
 
