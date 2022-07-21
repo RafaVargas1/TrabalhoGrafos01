@@ -1,7 +1,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <sstream>
 #include <iostream>
 
 using std::cin;
@@ -13,6 +13,15 @@ using std::string;
 #include "./Graph/graph.cpp"
 #include "./Node/node.cpp"
 
+
+/*
+ * Lê e instancia o grafo a partir do arquivo escrito 
+ * @params: FILE *file: arquivo de onde o grafo sera lido
+ *          bool isDirected: se o grafo é direcionado
+ *          bool hasWeightedEdges: se o grafo tem peso nas arestas
+ *          bool hasWeightedNodes: se o grafo tem peso nos nos
+ * @return: Graph*: Grafo final instaciado 
+ ****************************************************************/
 Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEdges, bool hasWeightedNodes) {
     Graph *graph = new Graph(isDirected, hasWeightedEdges, hasWeightedNodes);
 
@@ -63,6 +72,103 @@ Graph *graphReadAndInstantiation(FILE *file, bool isDirected, bool hasWeightedEd
     return graph;
 }
 
+/*
+ * Pega o subgrafo vertice induzido por escrito e faz a instaciação dele 
+ * basedo no grafo origingal
+ * @params: Graph* originalGraph: grafo base a partir do qual sera gerado o subgrafo
+ *          string nodes: String que descreve o vertice induzido
+ * @return: Graph*: subgrafo resultante, podendo ser o grafo original 
+ * ou um subgrafo vertice induzido digitado pelo usuario
+ ****************************************************************/
+Graph* graphNodeInduced(string nodes, Graph* originalGraph){
+    std::istringstream aux { nodes };
+
+    Graph* graph = new Graph(originalGraph->getDirected(), originalGraph->isEdgeWeighted(), originalGraph->isNodeWeighted());
+
+    string node;
+    vector<Node*> vectorNodes;
+    while ( std::getline(aux, node, ',')){
+        int nodeInt = stoi(node);
+
+        Node* originalNode = originalGraph->getNodeIfExist(nodeInt);
+        vectorNodes.push_back(originalNode);
+
+        graph->createNodeIfDoesntExist( nodeInt, originalNode->getId() );
+    }
+
+    for (int i=0; i < vectorNodes.size(); i++){
+        int cont = 0;
+        int* adjacents = originalGraph->getAllAdjacents( vectorNodes[i]->getId() , &cont);
+
+        for (int j=0; j < cont; j++){
+
+            Node* node = graph->getNodeIfExist(adjacents[j]);
+
+            if (node != nullptr){
+            
+                Edge* edge = vectorNodes[i]->getFirstEdge();
+               
+               while (edge != nullptr && edge->getTailNode()->getId() != node->getId()) {
+                    edge = edge->getNextEdge();
+                } 
+
+                if (edge != nullptr){
+                    Edge *edge1 = graph->createEdge(vectorNodes[i], node, edge->getWeight());
+                    Edge *edge2 = graph->createEdge(node, vectorNodes[i], edge->getWeight());
+                }
+            }
+           
+        }
+    }
+
+    return graph;
+}
+
+/*
+ * Recebe um grafo e permite que o usuario pegue um subgrafo vertice 
+ * induzido desse grafo
+ * @params: originalGraph: grafo base a partir do qual sera gerado o subgrafo
+ * @return: Graph*: subgrafo resultante, podendo ser o grafo original 
+ * ou um subgrafo vertice induzido digitado pelo usuario
+ ****************************************************************/
+Graph* processGraphNodeInduced(Graph* originalGraph){
+    int option;
+    cout << "Defina os nos a serem considerados: " << endl;
+
+    cout << "(0) Todos os nos (Grafo completo)" << endl;
+    cout << "(1) Nos especificos" << endl;
+    cin >> option;
+
+    string nodes;
+    switch (option){
+    case 0:
+        return originalGraph;
+        break;
+    case 1:
+        cout << "Defina os nos pelo ID separados por virgula" << endl;
+        cout << "Exemplo: 1,2,3" << endl;
+        cin >> nodes;  
+        return graphNodeInduced(nodes, originalGraph);;
+        break;
+    default:
+        cout << "Opcao invalida" << endl;
+        return processGraphNodeInduced(originalGraph);
+        break;
+    }
+ 
+    
+}
+
+/*
+ * Exibe os detalhes da entrada por escrito de forma descritiva 
+ * e permite que o usuario confirme ou nao essa entrada.
+ * @params: string fileName: nome do arquivo
+ *          string path: caminho ate o arquivo
+ *          bool hasWeightedEdge: se o grafo tem peso nas arestas
+ *          bool hasWeightedNode: se o grafo tem peso nos nos
+ *          bool isDirected: se o grafo é direcionado
+ * @return: bool: Se o usuário confirma a entrada
+ ****************************************************************/
 bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWeightedNode, bool isDirected) {
     int confirmation;
 
@@ -91,6 +197,15 @@ bool confirmEntry(string fileName, string path, bool hasWeightedEdge, bool hasWe
     return false;
 }
 
+/*
+ * Exibe e processa os opções e escolhas
+ * @params: char *argv[]: lista de argumentos
+ *          bool hasWeightedNode: se o grafo tem peso nos nos
+ *          bool hasWeightedEdge: se o grafo tem peso nas arestas
+ *          bool isDirected: se o grafo e direcionado
+ *          Graph *graph: grafo já instanciado
+ * @return:
+ ****************************************************************/
 void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeightedEdge, bool isDirected, Graph *graph) {
     int option;
     cout << "\nDigite a funcionalidade que deseja para o grafo inserido: " << endl;
@@ -112,6 +227,8 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     cout << "\n";
 
     int no, noDest;
+    Graph* newGraph;
+
     switch (option) {
         case 1:
             cout << "Fecho Transitivo Direto de qual no?" << endl;
@@ -146,10 +263,12 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
             graph->floyd(no, noDest);
             break;
         case 7:
-            graph->prim(argv[2]);
+            newGraph = processGraphNodeInduced(graph);
+            newGraph->prim(argv[2]);
             break;
         case 8:
-            graph->kruskal(argv[2]);
+            newGraph = processGraphNodeInduced(graph);
+            newGraph->kruskal(argv[2]);
             break;
         case 9:
             cout << "A partir de qual no?" << endl;
@@ -180,6 +299,13 @@ void processOperationChoice(char *argv[], bool hasWeightedNode, bool hasWeighted
     if (option == 1) processOperationChoice(argv, hasWeightedEdge, hasWeightedNode, isDirected, graph);
 }
 
+
+/*
+ * Funcao principal, faz as leituras dos argumentos passados na linha de comentado
+ * @params: argc: numero de arumentos
+ *          argv: argumentos 
+ * @return:
+ ****************************************************************/
 int main(int argc, char *argv[]) {
     FILE *file;
 
